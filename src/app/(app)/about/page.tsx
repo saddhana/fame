@@ -1,4 +1,4 @@
-import { Heart, Github, TreePine, Users, Camera, BookOpen } from 'lucide-react';
+import { Heart, TreePine, Users, Camera, BookOpen } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { getMembers } from '@/actions/members';
 import { MemberCard } from '@/components/members/MemberCard';
 import { MembersFilter } from '@/components/members/MembersFilter';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export default async function MembersPage({
   searchParams,
