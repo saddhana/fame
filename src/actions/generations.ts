@@ -49,8 +49,8 @@ export async function recomputeGenerations(): Promise<void> {
   while (queue.length > 0) {
     const { id, gen } = queue.shift()!;
 
-    // Skip if already assigned with a lower or equal generation (handles multiple parents)
-    if (generationMap.has(id) && generationMap.get(id)! <= gen) continue;
+    // Skip if already assigned with a higher or equal generation (keep the deepest path)
+    if (generationMap.has(id) && generationMap.get(id)! >= gen) continue;
     generationMap.set(id, gen);
 
     const children = childrenOf.get(id) || [];
@@ -63,6 +63,33 @@ export async function recomputeGenerations(): Promise<void> {
   for (const m of members) {
     if (!generationMap.has(m.id)) {
       generationMap.set(m.id, 1);
+    }
+  }
+
+  // Second pass: spouses should share the same generation as their partner.
+  // Repeat until stable in case of chains.
+  const { data: spouseRels } = await supabase
+    .from("relationships")
+    .select("person1_id, person2_id")
+    .eq("type", "spouse");
+
+  if (spouseRels?.length) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const rel of spouseRels) {
+        const g1 = generationMap.get(rel.person1_id) ?? 1;
+        const g2 = generationMap.get(rel.person2_id) ?? 1;
+        const target = Math.max(g1, g2);
+        if (g1 !== target) {
+          generationMap.set(rel.person1_id, target);
+          changed = true;
+        }
+        if (g2 !== target) {
+          generationMap.set(rel.person2_id, target);
+          changed = true;
+        }
+      }
     }
   }
 

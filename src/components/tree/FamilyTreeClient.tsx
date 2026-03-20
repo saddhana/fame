@@ -19,81 +19,199 @@ import dagre from 'dagre';
 import { Search, GitBranch, TreePine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { MemberNode } from './MemberNode';
+import { JunctionNode } from './JunctionNode';
 import type { FamilyMember, Relationship } from '@/types';
 
 const nodeTypes: NodeTypes = {
   member: MemberNode,
+  junction: JunctionNode,
 };
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
+const COUPLE_GAP = 60;
 
 function getLayoutedElements(
   members: FamilyMember[],
   relationships: Relationship[]
 ): { nodes: Node[]; edges: Edge[] } {
+  const spouseRels = relationships.filter((r) => r.type === 'spouse');
+  const parentChildRels = relationships.filter((r) => r.type === 'parent_child');
+
+  // Build couple groups
+  const assigned = new Set<string>();
+  const couples: { ids: string[]; rel?: Relationship }[] = [];
+  const memberCoupleIndex = new Map<string, number>();
+
+  for (const rel of spouseRels) {
+    if (assigned.has(rel.person1_id) || assigned.has(rel.person2_id)) continue;
+    const idx = couples.length;
+    couples.push({ ids: [rel.person1_id, rel.person2_id], rel });
+    memberCoupleIndex.set(rel.person1_id, idx);
+    memberCoupleIndex.set(rel.person2_id, idx);
+    assigned.add(rel.person1_id);
+    assigned.add(rel.person2_id);
+  }
+  for (const m of members) {
+    if (!assigned.has(m.id)) {
+      const idx = couples.length;
+      couples.push({ ids: [m.id] });
+      memberCoupleIndex.set(m.id, idx);
+    }
+  }
+
+  // Dagre layout using couple-level nodes
+  const coupleNodeId = (idx: number) => `couple-${idx}`;
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 120, edgesep: 40 });
+  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 140, edgesep: 30 });
 
-  // Add nodes
-  members.forEach((member) => {
-    g.setNode(member.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+  couples.forEach((couple, idx) => {
+    const w = couple.ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH;
+    g.setNode(coupleNodeId(idx), { width: w, height: NODE_HEIGHT });
   });
 
-  // Add edges for parent-child relationships
-  const parentChildRels = relationships.filter((r) => r.type === 'parent_child');
-  parentChildRels.forEach((rel) => {
-    g.setEdge(rel.person1_id, rel.person2_id);
-  });
+  const coupleEdgeSet = new Set<string>();
+  for (const rel of parentChildRels) {
+    const pIdx = memberCoupleIndex.get(rel.person1_id);
+    const cIdx = memberCoupleIndex.get(rel.person2_id);
+    if (pIdx === undefined || cIdx === undefined) continue;
+    const key = `${pIdx}->${cIdx}`;
+    if (!coupleEdgeSet.has(key)) {
+      coupleEdgeSet.add(key);
+      g.setEdge(coupleNodeId(pIdx), coupleNodeId(cIdx));
+    }
+  }
 
   dagre.layout(g);
 
-  const nodes: Node[] = members.map((member) => {
-    const nodeData = g.node(member.id);
-    return {
-      id: member.id,
-      type: 'member',
-      position: {
-        x: nodeData.x - NODE_WIDTH / 2,
-        y: nodeData.y - NODE_HEIGHT / 2,
-      },
-      data: { member },
-    };
-  });
-
+  const memberById = new Map(members.map(m => [m.id, m]));
+  const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // Parent-child edges
-  parentChildRels.forEach((rel) => {
-    edges.push({
-      id: `pc-${rel.id}`,
-      source: rel.person1_id,
-      target: rel.person2_id,
-      type: 'smoothstep',
-      style: { stroke: '#b45309', strokeWidth: 2 },
-      animated: false,
-    });
+  // Which couples have children?
+  const coupleHasChildren = new Set<number>();
+  for (const rel of parentChildRels) {
+    const pIdx = memberCoupleIndex.get(rel.person1_id);
+    if (pIdx !== undefined) coupleHasChildren.add(pIdx);
+  }
+
+  // Place member nodes & junction nodes
+  couples.forEach((couple, idx) => {
+    const coupleNode = g.node(coupleNodeId(idx));
+    const cx = coupleNode.x;
+    const cy = coupleNode.y;
+
+    if (couple.ids.length === 2) {
+      const halfSpan = (NODE_WIDTH + COUPLE_GAP) / 2;
+
+      const m0 = memberById.get(couple.ids[0]);
+      const m1 = memberById.get(couple.ids[1]);
+      if (m0) {
+        nodes.push({
+          id: m0.id, type: 'member',
+          position: { x: cx - halfSpan - NODE_WIDTH / 2, y: cy - NODE_HEIGHT / 2 },
+          data: { member: m0 },
+        });
+      }
+      if (m1) {
+        nodes.push({
+          id: m1.id, type: 'member',
+          position: { x: cx + halfSpan - NODE_WIDTH / 2, y: cy - NODE_HEIGHT / 2 },
+          data: { member: m1 },
+        });
+      }
+
+      // Spouse edge: side-to-side using right/left handles
+      if (couple.rel) {
+        edges.push({
+          id: `sp-${couple.rel.id}`,
+          source: couple.ids[0],
+          sourceHandle: 'right',
+          target: couple.ids[1],
+          targetHandle: 'left',
+          type: 'straight',
+          style: {
+            stroke: couple.rel.is_active ? '#dc2626' : '#9ca3af',
+            strokeWidth: 2,
+            strokeDasharray: couple.rel.is_active ? undefined : '6 3',
+          },
+          label: couple.rel.is_active ? '♥' : '✕',
+          labelStyle: { fontSize: 14 },
+        });
+      }
+
+      // Junction node at center-bottom of couple (for child edges)
+      if (coupleHasChildren.has(idx)) {
+        const jId = `junction-${idx}`;
+        nodes.push({
+          id: jId, type: 'junction',
+          position: { x: cx - 1, y: cy + NODE_HEIGHT / 2 + 10 },
+          data: {},
+          width: 2,
+          height: 2,
+          draggable: false,
+          selectable: false,
+        });
+
+        // Connect both spouses to junction (short vertical lines from each spouse bottom to junction top)
+        edges.push({
+          id: `j-link-0-${idx}`,
+          source: couple.ids[0],
+          sourceHandle: 'bottom',
+          target: jId,
+          targetHandle: 'top',
+          type: 'straight',
+          style: { stroke: '#b45309', strokeWidth: 2 },
+        });
+        edges.push({
+          id: `j-link-1-${idx}`,
+          source: couple.ids[1],
+          sourceHandle: 'bottom',
+          target: jId,
+          targetHandle: 'top',
+          type: 'straight',
+          style: { stroke: '#b45309', strokeWidth: 2 },
+        });
+      }
+    } else {
+      const m = memberById.get(couple.ids[0]);
+      if (m) {
+        nodes.push({
+          id: m.id, type: 'member',
+          position: { x: cx - NODE_WIDTH / 2, y: cy - NODE_HEIGHT / 2 },
+          data: { member: m },
+        });
+      }
+    }
   });
 
-  // Spouse edges
-  const spouseRels = relationships.filter((r) => r.type === 'spouse');
-  spouseRels.forEach((rel) => {
-    edges.push({
-      id: `sp-${rel.id}`,
-      source: rel.person1_id,
-      target: rel.person2_id,
-      type: 'straight',
-      style: {
-        stroke: rel.is_active ? '#dc2626' : '#9ca3af',
-        strokeWidth: 2,
-        strokeDasharray: rel.is_active ? undefined : '6 3',
-      },
-      animated: false,
-      label: rel.is_active ? '♥' : '✕',
-      labelStyle: { fontSize: 14 },
-    });
-  });
+  // Parent-child edges: from junction (couple) or parent (single) → child
+  const childrenByCouple = new Map<number, Set<string>>();
+  for (const rel of parentChildRels) {
+    const pIdx = memberCoupleIndex.get(rel.person1_id);
+    if (pIdx === undefined) continue;
+    if (!childrenByCouple.has(pIdx)) childrenByCouple.set(pIdx, new Set());
+    childrenByCouple.get(pIdx)!.add(rel.person2_id);
+  }
+
+  for (const [coupleIdx, childIds] of childrenByCouple) {
+    const couple = couples[coupleIdx];
+    const sourceId = couple.ids.length === 2 ? `junction-${coupleIdx}` : couple.ids[0];
+    const sourceHandle = couple.ids.length === 2 ? 'bottom' : undefined;
+
+    for (const childId of childIds) {
+      edges.push({
+        id: `pc-${coupleIdx}-${childId}`,
+        source: sourceId,
+        sourceHandle,
+        target: childId,
+        targetHandle: 'top',
+        type: 'smoothstep',
+        style: { stroke: '#b45309', strokeWidth: 2 },
+      });
+    }
+  }
 
   return { nodes, edges };
 }

@@ -23,6 +23,9 @@ interface CloudinaryResult {
   info: {
     secure_url: string;
     public_id: string;
+    coordinates?: {
+      custom?: number[][];
+    };
   };
 }
 
@@ -30,6 +33,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [photoUrl, setPhotoUrl] = useState(member?.profile_photo_url || '');
+  const [isDeceased, setIsDeceased] = useState(!!member?.death_date);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,7 +43,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       full_name: formData.get('full_name') as string,
       nickname: (formData.get('nickname') as string) || null,
       birth_date: (formData.get('birth_date') as string) || null,
-      death_date: (formData.get('death_date') as string) || null,
+      death_date: isDeceased ? ((formData.get('death_date') as string) || null) : null,
       gender: (formData.get('gender') as 'L' | 'P') || 'L',
       birth_place: (formData.get('birth_place') as string) || null,
       phone: (formData.get('phone') as string) || null,
@@ -101,7 +105,14 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           }}
           onSuccess={(result) => {
             const res = result as CloudinaryResult;
-            setPhotoUrl(res.info.secure_url);
+            const { secure_url, coordinates } = res.info;
+            const cropCoords = coordinates?.custom?.[0];
+            if (cropCoords) {
+              const [x, y, w, h] = cropCoords;
+              setPhotoUrl(secure_url.replace('/upload/', `/upload/c_crop,g_north_west,x_${x},y_${y},w_${w},h_${h}/`));
+            } else {
+              setPhotoUrl(secure_url);
+            }
           }}
         >
           {({ open }) => (
@@ -173,16 +184,30 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="death_date" className="text-amber-800">Tanggal Meninggal</Label>
-          <Input
-            id="death_date"
-            name="death_date"
-            type="date"
-            defaultValue={member?.death_date || ''}
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
+        <div className="space-y-2 sm:col-span-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isDeceased}
+              onChange={(e) => setIsDeceased(e.target.checked)}
+              className="w-4 h-4 rounded border-amber-300 accent-amber-600"
+            />
+            <span className="text-sm text-amber-800">Sudah meninggal dunia</span>
+          </label>
         </div>
+
+        {isDeceased && (
+          <div className="space-y-2">
+            <Label htmlFor="death_date" className="text-amber-800">Tanggal Meninggal</Label>
+            <Input
+              id="death_date"
+              name="death_date"
+              type="date"
+              defaultValue={member?.death_date || ''}
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
+        )}
 
       </div>
 

@@ -11,9 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getMemberById } from '@/actions/members';
-import { getSpouses, getParents, getChildren, getSiblings } from '@/actions/relationships';
+import { getSpouses, getParents, getChildren, getSiblings, getChildrenInLaw, getParentsInLaw } from '@/actions/relationships';
 import { getPhotosByMember } from '@/actions/photos';
 import { RelationshipManager } from '@/components/members/RelationshipManager';
+import { RemoveRelationshipButton } from '@/components/members/RemoveRelationshipButton';
 
 export default async function MemberDetailPage({
   params,
@@ -24,11 +25,13 @@ export default async function MemberDetailPage({
   const member = await getMemberById(id);
   if (!member) notFound();
 
-  const [spouses, parents, children, siblings, photos] = await Promise.all([
+  const [spouses, parents, children, siblings, childrenInLaw, parentsInLaw, photos] = await Promise.all([
     getSpouses(id),
     getParents(id),
     getChildren(id),
     getSiblings(id),
+    getChildrenInLaw(id),
+    getParentsInLaw(id),
     getPhotosByMember(id),
   ]);
 
@@ -178,6 +181,7 @@ export default async function MemberDetailPage({
                 title="Pasangan"
                 members={spouses.map(s => ({
                   ...s,
+                  _relationshipId: s.relationship.id,
                   _badge: !s.relationship.is_active ? 'Bercerai' : s.relationship.marriage_order && s.relationship.marriage_order > 1 ? `Pernikahan ke-${s.relationship.marriage_order}` : undefined,
                 }))}
               />
@@ -194,6 +198,20 @@ export default async function MemberDetailPage({
                 icon={<Users className="w-4 h-4" />}
                 title="Saudara"
                 members={siblings}
+              />
+
+              {/* Parents-in-law */}
+              <RelationSection
+                icon={<Users className="w-4 h-4" />}
+                title="Mertua"
+                members={parentsInLaw}
+              />
+
+              {/* Children-in-law */}
+              <RelationSection
+                icon={<Heart className="w-4 h-4" />}
+                title="Menantu"
+                members={childrenInLaw}
               />
             </div>
           </div>
@@ -238,7 +256,7 @@ function RelationSection({
 }: {
   icon: React.ReactNode;
   title: string;
-  members: (import('@/types').FamilyMember & { _badge?: string })[];
+  members: (import('@/types').FamilyMember & { _badge?: string; _relationshipId?: string })[];
 }) {
   return (
     <div className="bg-amber-50/50 rounded-xl p-4">
@@ -251,27 +269,31 @@ function RelationSection({
       ) : (
         <div className="space-y-1.5">
           {members.map((m) => (
-            <Link
-              key={m.id}
-              href={`/members/${m.id}`}
-              className="flex items-center gap-2 text-sm text-amber-800 hover:text-amber-600 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-full overflow-hidden bg-amber-200/50 shrink-0">
-                {m.profile_photo_url ? (
-                  <Image src={m.profile_photo_url} alt="" width={24} height={24} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-3 h-3 text-amber-400" />
-                  </div>
+            <div key={m.id} className="flex items-center gap-2">
+              <Link
+                href={`/members/${m.id}`}
+                className="flex items-center gap-2 text-sm text-amber-800 hover:text-amber-600 transition-colors min-w-0 flex-1"
+              >
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-amber-200/50 shrink-0">
+                  {m.profile_photo_url ? (
+                    <Image src={m.profile_photo_url} alt="" width={24} height={24} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-3 h-3 text-amber-400" />
+                    </div>
+                  )}
+                </div>
+                <span className="truncate">{m.full_name}</span>
+                {'_badge' in m && m._badge && (
+                  <Badge variant="outline" className="text-[10px] border-amber-200 text-amber-500 shrink-0">
+                    {m._badge}
+                  </Badge>
                 )}
-              </div>
-              <span className="truncate">{m.full_name}</span>
-              {'_badge' in m && m._badge && (
-                <Badge variant="outline" className="text-[10px] border-amber-200 text-amber-500 shrink-0">
-                  {m._badge}
-                </Badge>
+              </Link>
+              {'_relationshipId' in m && m._relationshipId && (
+                <RemoveRelationshipButton relationshipId={m._relationshipId} label={m.full_name} />
               )}
-            </Link>
+            </div>
           ))}
         </div>
       )}

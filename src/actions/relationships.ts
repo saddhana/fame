@@ -54,40 +54,52 @@ export async function getSpouses(
   );
 }
 
-export async function getParents(memberId: string): Promise<FamilyMember[]> {
+export async function getParents(
+  memberId: string,
+): Promise<(FamilyMember & { _relationshipId: string })[]> {
   const { data: rels, error } = await supabase
     .from("relationships")
-    .select("person1_id")
+    .select("id, person1_id")
     .eq("person2_id", memberId)
     .eq("type", "parent_child");
 
   if (error || !rels?.length) return [];
 
+  const relMap = new Map(rels.map((r) => [r.person1_id, r.id]));
   const parentIds = rels.map((r) => r.person1_id);
   const { data } = await supabase
     .from("family_members")
     .select("*")
     .in("id", parentIds);
 
-  return data || [];
+  return (data || []).map((m) => ({
+    ...m,
+    _relationshipId: relMap.get(m.id)!,
+  }));
 }
 
-export async function getChildren(memberId: string): Promise<FamilyMember[]> {
+export async function getChildren(
+  memberId: string,
+): Promise<(FamilyMember & { _relationshipId: string })[]> {
   const { data: rels, error } = await supabase
     .from("relationships")
-    .select("person2_id")
+    .select("id, person2_id")
     .eq("person1_id", memberId)
     .eq("type", "parent_child");
 
   if (error || !rels?.length) return [];
 
+  const relMap = new Map(rels.map((r) => [r.person2_id, r.id]));
   const childIds = rels.map((r) => r.person2_id);
   const { data } = await supabase
     .from("family_members")
     .select("*")
     .in("id", childIds);
 
-  return data || [];
+  return (data || []).map((m) => ({
+    ...m,
+    _relationshipId: relMap.get(m.id)!,
+  }));
 }
 
 export async function getSiblings(memberId: string): Promise<FamilyMember[]> {
@@ -117,10 +129,66 @@ export async function getSiblings(memberId: string): Promise<FamilyMember[]> {
   return data || [];
 }
 
+export async function getChildrenInLaw(
+  memberId: string,
+): Promise<FamilyMember[]> {
+  // Children's spouses
+  const children = await getChildren(memberId);
+  if (!children.length) return [];
+  const results: FamilyMember[] = [];
+  const seen = new Set<string>();
+  for (const child of children) {
+    const spouses = await getSpouses(child.id);
+    for (const s of spouses) {
+      if (!seen.has(s.id)) {
+        seen.add(s.id);
+        results.push(s);
+      }
+    }
+  }
+  return results;
+}
+
+export async function getParentsInLaw(
+  memberId: string,
+): Promise<FamilyMember[]> {
+  // Spouses' parents
+  const spouses = await getSpouses(memberId);
+  if (!spouses.length) return [];
+  const results: FamilyMember[] = [];
+  const seen = new Set<string>();
+  for (const spouse of spouses) {
+    const parents = await getParents(spouse.id);
+    for (const { _relationshipId: _rid, ...p } of parents) {
+      void _rid;
+      if (!seen.has(p.id)) {
+        seen.add(p.id);
+        results.push(p);
+      }
+    }
+  }
+  return results;
+}
+
 export async function createRelationship(
   input: RelationshipInput,
 ): Promise<Relationship> {
   const db = createServerSupabase();
+
+  // Check for duplicate relationship (both directions)
+  const { data: existing } = await db
+    .from("relationships")
+    .select("id")
+    .eq("type", input.type)
+    .or(
+      `and(person1_id.eq.${input.person1_id},person2_id.eq.${input.person2_id}),and(person1_id.eq.${input.person2_id},person2_id.eq.${input.person1_id})`,
+    )
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    throw new Error("Hubungan ini sudah ada");
+  }
+
   const { data, error } = await db
     .from("relationships")
     .insert(input)
@@ -128,7 +196,7 @@ export async function createRelationship(
     .single();
 
   if (error) throw new Error(error.message);
-  if (input.type === "parent_child") {
+  if (input.type === "parent_child" || input.type === "spouse") {
     await recomputeGenerations();
   }
   revalidatePath("/members");
@@ -148,7 +216,7 @@ export async function deleteRelationship(id: string): Promise<void> {
   const { error } = await db.from("relationships").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
-  if (rel?.type === "parent_child") {
+  if (rel?.type === "parent_child" || rel?.type === "spouse") {
     await recomputeGenerations();
   }
   revalidatePath("/members");
