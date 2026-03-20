@@ -47,7 +47,6 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       address: (formData.get('address') as string) || null,
       bio: (formData.get('bio') as string) || null,
       profile_photo_url: photoUrl || null,
-      generation: parseInt(formData.get('generation') as string) || 1,
     };
 
     startTransition(async () => {
@@ -185,18 +184,6 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="generation" className="text-amber-800">Generasi *</Label>
-          <Input
-            id="generation"
-            name="generation"
-            type="number"
-            min="1"
-            required
-            defaultValue={member?.generation || 1}
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
-        </div>
       </div>
 
       {/* Contact */}

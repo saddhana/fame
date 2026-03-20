@@ -4,7 +4,7 @@ export interface FamilyMember {
   nickname: string | null;
   birth_date: string | null;
   death_date: string | null;
-  gender: 'L' | 'P';
+  gender: "L" | "P";
   birth_place: string | null;
   phone: string | null;
   email: string | null;
@@ -20,7 +20,7 @@ export interface Relationship {
   id: string;
   person1_id: string;
   person2_id: string;
-  type: 'spouse' | 'parent_child';
+  type: "spouse" | "parent_child";
   marriage_date: string | null;
   divorce_date: string | null;
   is_active: boolean;
@@ -35,7 +35,7 @@ export interface Photo {
   url: string;
   thumbnail_url: string | null;
   caption: string | null;
-  photo_type: 'family' | 'personal' | 'event';
+  photo_type: "family" | "personal" | "event";
   event_name: string | null;
   taken_date: string | null;
   created_at: string;
@@ -59,9 +59,12 @@ export interface PhotoWithTags extends Photo {
   tags: (PhotoTag & { member: FamilyMember })[];
 }
 
-// Form input types
-export type FamilyMemberInput = Omit<FamilyMember, 'id' | 'created_at' | 'updated_at'>;
+// Form input types (generation is auto-computed from relationships)
+export type FamilyMemberInput = Omit<
+  FamilyMember,
+  "id" | "created_at" | "updated_at" | "generation"
+>;
 
-export type RelationshipInput = Omit<Relationship, 'id' | 'created_at'>;
+export type RelationshipInput = Omit<Relationship, "id" | "created_at">;
 
-export type PhotoInput = Omit<Photo, 'id' | 'created_at'>;
+export type PhotoInput = Omit<Photo, "id" | "created_at">;

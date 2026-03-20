@@ -11,7 +11,7 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'fs';
-import { resolve, dirname, basename } from 'path';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
