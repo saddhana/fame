@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/migrate.mjs && next build",
+    "migrate": "node scripts/migrate.mjs",
+    "migration:new": "supabase migration new",
     "start": "next start",
     "lint": "eslint"
   },
@@ -37,6 +39,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
+    "supabase": "^2.82.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

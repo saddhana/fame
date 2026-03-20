@@ -1,11 +1,17 @@
 /**
- * Database migration script — runs supabase-schema.sql against the Postgres database.
+ * Database migration runner — applies all pending migrations from supabase/migrations/.
  * Executed automatically during `pnpm build` (before Next.js build).
- * Safe to run multiple times — all SQL statements are idempotent.
+ *
+ * Workflow:
+ *   - Add new migrations: pnpm migration:new <name>   (requires Supabase CLI)
+ *   - Run manually:       pnpm migrate
+ *   - Runs automatically on every deploy via: pnpm build
+ *
+ * Tracks applied migrations in a `_migrations` table to avoid re-running.
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { readFileSync, readdirSync, existsSync } from 'fs';
+import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,10 +48,49 @@ const sql = postgres(DATABASE_URL, {
 });
 
 try {
-  console.log('🔄 Running database migrations...');
-  const schema = readFileSync(resolve(root, 'supabase-schema.sql'), 'utf-8');
-  await sql.unsafe(schema);
-  console.log('✅ Migrations completed successfully');
+  // Create migrations tracking table if it doesn't exist
+  await sql.unsafe(`
+    CREATE TABLE IF NOT EXISTS _migrations (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // Get already-applied migrations
+  const applied = await sql`SELECT name FROM _migrations`;
+  const appliedSet = new Set(applied.map((r) => r.name));
+
+  // Find all migration files, sorted by filename (timestamp order)
+  const migrationsDir = resolve(root, 'supabase', 'migrations');
+  if (!existsSync(migrationsDir)) {
+    console.log('No migrations directory found — skipping');
+    process.exit(0);
+  }
+
+  const files = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+
+  const pending = files.filter((f) => !appliedSet.has(f));
+
+  if (pending.length === 0) {
+    console.log('✅ Database is up to date — no pending migrations');
+    process.exit(0);
+  }
+
+  console.log(`🔄 Applying ${pending.length} migration(s)...`);
+
+  for (const file of pending) {
+    const filePath = resolve(migrationsDir, file);
+    const migrationSql = readFileSync(filePath, 'utf-8');
+
+    console.log(`  ↳ ${file}`);
+    await sql.unsafe(migrationSql);
+    await sql`INSERT INTO _migrations (name) VALUES (${file})`;
+  }
+
+  console.log('✅ All migrations applied successfully');
 } catch (err) {
   console.error('❌ Migration failed:', err.message);
   process.exit(1);
