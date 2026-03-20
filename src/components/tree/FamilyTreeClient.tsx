@@ -178,17 +178,17 @@ export function FamilyTreeClient({
           className="opacity-30"
         />
         <Controls
-          className="!bg-white/90 !border-amber-200 !shadow-lg !rounded-xl"
+          className="bg-white/90! border-amber-200! shadow-lg! rounded-xl!"
         />
         <MiniMap
           nodeStrokeColor="#b45309"
           nodeColor="#fef3c7"
           maskColor="rgba(255, 251, 235, 0.7)"
-          className="!bg-white/90 !border-amber-200 !shadow-lg !rounded-xl"
+          className="bg-white/90! border-amber-200! shadow-lg! rounded-xl!"
         />
 
         {/* Search panel */}
-        <Panel position="top-left" className="!ml-4 !mt-4">
+        <Panel position="top-left" className="ml-4! mt-4!">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
@@ -212,7 +212,7 @@ export function FamilyTreeClient({
         </Panel>
 
         {/* Legend */}
-        <Panel position="bottom-left" className="!ml-4 !mb-4">
+        <Panel position="bottom-left" className="ml-4! mb-4!">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3 text-xs space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 bg-amber-700 rounded" />

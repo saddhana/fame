@@ -16,7 +16,7 @@ function MemberNodeComponent({ data }: NodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} className="!bg-amber-500 !w-2 !h-2 !border-2 !border-amber-300" />
+      <Handle type="target" position={Position.Top} className="bg-amber-500! w-2! h-2! border-2! border-amber-300!" />
 
       <div
         onClick={() => router.push(`/members/${member.id}`)}
@@ -85,7 +85,7 @@ function MemberNodeComponent({ data }: NodeProps) {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-amber-500 !w-2 !h-2 !border-2 !border-amber-300" />
+      <Handle type="source" position={Position.Bottom} className="bg-amber-500! w-2! h-2! border-2! border-amber-300!" />
     </>
   );
 }
