@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { deleteRelationship } from '@/actions/relationships';
+import { useAuth } from '@/components/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ export function RemoveRelationshipButton({
   label: string;
 }) {
   const router = useRouter();
+  const authed = useAuth();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
@@ -41,7 +43,7 @@ export function RemoveRelationshipButton({
   return (
     <>
       <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!authed) { router.push('/login?redirect=' + encodeURIComponent(window.location.pathname)); return; } setOpen(true); }}
         title="Hapus hubungan"
         className="ml-auto shrink-0 rounded-md p-2 text-amber-300 hover:text-red-500 hover:bg-red-50 transition-colors active:scale-90"
       >

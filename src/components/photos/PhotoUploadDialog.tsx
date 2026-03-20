@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
 import { Upload, Image as ImageIcon } from 'lucide-react';
+import { useAuth } from '@/components/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +32,7 @@ interface CloudinaryResult {
 
 export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
   const router = useRouter();
+  const authed = useAuth();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [uploadedUrl, setUploadedUrl] = useState('');
@@ -80,7 +82,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger
-        render={<Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20" />}
+        render={<Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20" onClick={(e: React.MouseEvent) => { if (!authed) { e.preventDefault(); router.push('/login?redirect=' + encodeURIComponent(window.location.pathname)); } }} />}
       >
         <Upload className="w-4 h-4 mr-2" />
         Unggah Foto

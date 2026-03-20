@@ -1,16 +1,17 @@
-'use server';
+"use server";
 
-import { createServerSupabase } from '@/lib/supabase';
-import { supabase } from '@/lib/supabase';
-import type { FamilyMember, FamilyMemberInput } from '@/types';
-import { revalidatePath } from 'next/cache';
+import { createServerSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import type { FamilyMember, FamilyMemberInput } from "@/types";
+import { revalidatePath } from "next/cache";
+import { isAuthenticated } from "@/lib/auth";
 
 export async function getMembers(): Promise<FamilyMember[]> {
   const { data, error } = await supabase
-    .from('family_members')
-    .select('*')
-    .order('generation', { ascending: true })
-    .order('full_name', { ascending: true });
+    .from("family_members")
+    .select("*")
+    .order("generation", { ascending: true })
+    .order("full_name", { ascending: true });
 
   if (error) throw new Error(error.message);
   return data || [];
@@ -18,9 +19,9 @@ export async function getMembers(): Promise<FamilyMember[]> {
 
 export async function getMemberById(id: string): Promise<FamilyMember | null> {
   const { data, error } = await supabase
-    .from('family_members')
-    .select('*')
-    .eq('id', id)
+    .from("family_members")
+    .select("*")
+    .eq("id", id)
     .single();
 
   if (error) return null;
@@ -29,65 +30,70 @@ export async function getMemberById(id: string): Promise<FamilyMember | null> {
 
 export async function searchMembers(query: string): Promise<FamilyMember[]> {
   const { data, error } = await supabase
-    .from('family_members')
-    .select('*')
+    .from("family_members")
+    .select("*")
     .or(`full_name.ilike.%${query}%,nickname.ilike.%${query}%`)
-    .order('full_name', { ascending: true })
+    .order("full_name", { ascending: true })
     .limit(20);
 
   if (error) throw new Error(error.message);
   return data || [];
 }
 
-export async function createMember(input: FamilyMemberInput): Promise<FamilyMember> {
+export async function createMember(
+  input: FamilyMemberInput,
+): Promise<FamilyMember> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
   const { data, error } = await db
-    .from('family_members')
+    .from("family_members")
     .insert(input)
     .select()
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath('/members');
-  revalidatePath('/family-tree');
-  revalidatePath('/');
+  revalidatePath("/members");
+  revalidatePath("/family-tree");
+  revalidatePath("/");
   return data;
 }
 
-export async function updateMember(id: string, input: Partial<FamilyMemberInput>): Promise<FamilyMember> {
+export async function updateMember(
+  id: string,
+  input: Partial<FamilyMemberInput>,
+): Promise<FamilyMember> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
   const { data, error } = await db
-    .from('family_members')
+    .from("family_members")
     .update(input)
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath('/members');
+  revalidatePath("/members");
   revalidatePath(`/members/${id}`);
-  revalidatePath('/family-tree');
-  revalidatePath('/');
+  revalidatePath("/family-tree");
+  revalidatePath("/");
   return data;
 }
 
 export async function deleteMember(id: string): Promise<void> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
-  const { error } = await db
-    .from('family_members')
-    .delete()
-    .eq('id', id);
+  const { error } = await db.from("family_members").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
-  revalidatePath('/members');
-  revalidatePath('/family-tree');
-  revalidatePath('/');
+  revalidatePath("/members");
+  revalidatePath("/family-tree");
+  revalidatePath("/");
 }
 
 export async function getMemberCount(): Promise<number> {
   const { count, error } = await supabase
-    .from('family_members')
-    .select('*', { count: 'exact', head: true });
+    .from("family_members")
+    .select("*", { count: "exact", head: true });
 
   if (error) throw new Error(error.message);
   return count || 0;
@@ -95,9 +101,9 @@ export async function getMemberCount(): Promise<number> {
 
 export async function getGenerationCount(): Promise<number> {
   const { data, error } = await supabase
-    .from('family_members')
-    .select('generation')
-    .order('generation', { ascending: false })
+    .from("family_members")
+    .select("generation")
+    .order("generation", { ascending: false })
     .limit(1)
     .single();
 

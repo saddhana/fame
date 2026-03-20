@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, UserPlus, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/components/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ interface RelationshipManagerProps {
 
 export function RelationshipManager({ memberId, defaultRelType }: RelationshipManagerProps) {
   const router = useRouter();
+  const authed = useAuth();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [members, setMembers] = useState<FamilyMember[]>([]);
@@ -325,7 +327,7 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogTrigger
-        render={<Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-3" />}
+        render={<Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-3" onClick={(e: React.MouseEvent) => { if (!authed) { e.preventDefault(); router.push('/login?redirect=' + encodeURIComponent(window.location.pathname)); } }} />}
       >
         <Plus className="w-4 h-4 mr-1" />
         Tambah

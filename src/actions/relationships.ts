@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import type { Relationship, RelationshipInput, FamilyMember } from "@/types";
 import { revalidatePath } from "next/cache";
 import { recomputeGenerations } from "./generations";
+import { isAuthenticated } from "@/lib/auth";
 
 export async function getRelationships(): Promise<Relationship[]> {
   const { data, error } = await supabase.from("relationships").select("*");
@@ -173,6 +174,7 @@ export async function getParentsInLaw(
 export async function createRelationship(
   input: RelationshipInput,
 ): Promise<Relationship> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
 
   // Check for duplicate relationship (both directions)
@@ -205,6 +207,7 @@ export async function createRelationship(
 }
 
 export async function deleteRelationship(id: string): Promise<void> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
   // Check if this is a parent_child relationship before deleting
   const { data: rel } = await supabase
@@ -227,6 +230,7 @@ export async function endMarriage(
   relationshipId: string,
   divorceDate: string,
 ): Promise<void> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
   const db = createServerSupabase();
   const { error } = await db
     .from("relationships")

@@ -10,9 +10,11 @@ import {
   Camera,
   Info,
   LogOut,
+  LogIn,
   TreePine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/components/AuthContext';
 
 const navItems = [
   { href: '/', label: 'Beranda', icon: Home },
@@ -24,6 +26,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const authed = useAuth();
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -77,15 +80,25 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Logout */}
+      {/* Auth */}
       <div className="p-4 border-t border-amber-800/50">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-amber-400/60 hover:text-amber-200 hover:bg-amber-800/30 transition-all duration-200 w-full"
-        >
-          <LogOut className="w-5 h-5" />
-          Keluar
-        </button>
+        {authed ? (
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-amber-400/60 hover:text-amber-200 hover:bg-amber-800/30 transition-all duration-200 w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            Keluar
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-amber-400/60 hover:text-amber-200 hover:bg-amber-800/30 transition-all duration-200 w-full"
+          >
+            <LogIn className="w-5 h-5" />
+            Masuk
+          </Link>
+        )}
       </div>
     </aside>
   );
