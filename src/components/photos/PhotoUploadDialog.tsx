@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
@@ -98,7 +99,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
             <Label className="text-amber-800">Foto *</Label>
             {uploadedUrl ? (
               <div className="relative rounded-xl overflow-hidden bg-amber-50 border border-amber-200">
-                <img src={uploadedUrl} alt="Preview" className="w-full h-40 object-cover" />
+                <Image src={uploadedUrl} alt="Preview" width={400} height={160} className="w-full h-40 object-cover" />
                 <button
                   type="button"
                   onClick={resetForm}

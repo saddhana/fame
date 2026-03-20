@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Camera, Upload, Search, Filter, X, ZoomIn } from 'lucide-react';
+import { Camera, Search, ZoomIn } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PhotoUploadDialog } from './PhotoUploadDialog';
 import { PhotoLightbox } from './PhotoLightbox';

@@ -22,7 +22,7 @@ function MemberNodeComponent({ data }: NodeProps) {
         onClick={() => router.push(`/members/${member.id}`)}
         className={`
           group cursor-pointer rounded-xl border-2 shadow-md hover:shadow-lg transition-all duration-200
-          bg-white min-w-[180px]
+          bg-white min-w-45
           ${isDeceased
             ? 'border-stone-300 opacity-80'
             : isMale
@@ -63,11 +63,11 @@ function MemberNodeComponent({ data }: NodeProps) {
 
           {/* Info */}
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-amber-950 truncate max-w-[120px] group-hover:text-amber-700 transition-colors">
+            <p className="text-xs font-semibold text-amber-950 truncate max-w-30 group-hover:text-amber-700 transition-colors">
               {member.full_name}
             </p>
             {member.nickname && (
-              <p className="text-[10px] text-amber-600/60 truncate max-w-[120px]">
+              <p className="text-[10px] text-amber-600/60 truncate max-w-30">
                 &ldquo;{member.nickname}&rdquo;
               </p>
             )}
