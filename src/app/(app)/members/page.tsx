@@ -48,7 +48,7 @@ export default async function MembersPage({
             </div>
             Anggota Keluarga
           </h1>
-          <p className="text-sm text-amber-600/70 mt-1 ml-[52px]">
+          <p className="text-sm text-amber-600/70 mt-1 ml-13">
             {members.length} anggota terdaftar
           </p>
         </div>
