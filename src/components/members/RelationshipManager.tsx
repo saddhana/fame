@@ -220,6 +220,8 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
           facebook: null,
           twitter: null,
           linkedin: null,
+          location_lat: null,
+          location_lng: null,
         });
         setMembers(prev => [...prev, newMember]);
         setSelectedMemberId(newMember.id);

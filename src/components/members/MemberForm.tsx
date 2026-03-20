@@ -6,6 +6,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { User, Upload, X, UserCircle, Phone, FileText, Share2 } from 'lucide-react';
+import { LocationPicker } from '@/components/members/LocationPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +35,8 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   const [photoUrl, setPhotoUrl] = useState(member?.profile_photo_url || '');
   const [isDeceased, setIsDeceased] = useState(!!member?.death_date);
   const [gender, setGender] = useState<'L' | 'P'>(member?.gender || 'L');
+  const [locationLat, setLocationLat] = useState<number | null>(member?.location_lat ?? null);
+  const [locationLng, setLocationLng] = useState<number | null>(member?.location_lng ?? null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,6 +58,8 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       facebook: (formData.get('facebook') as string) || null,
       twitter: (formData.get('twitter') as string) || null,
       linkedin: (formData.get('linkedin') as string) || null,
+      location_lat: locationLat,
+      location_lng: locationLng,
     };
 
     startTransition(async () => {
@@ -279,6 +284,18 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             placeholder="Alamat tempat tinggal"
             className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 resize-none"
             rows={2}
+          />
+        </div>
+
+        {/* Location */}
+        <div className="space-y-2">
+          <Label className="text-amber-800 text-base">
+            Lokasi
+          </Label>
+          <LocationPicker
+            lat={locationLat}
+            lng={locationLng}
+            onChange={(lat, lng) => { setLocationLat(lat); setLocationLng(lng); }}
           />
         </div>
       </div>

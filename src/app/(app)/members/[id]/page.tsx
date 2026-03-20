@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import {
   User, Calendar, MapPin, Phone, Mail, Home as HomeIcon,
-  Edit, ArrowLeft, Heart, Users, HeartHandshake, Share2,
+  Edit, ArrowLeft, Heart, Users, HeartHandshake, Share2, ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import { getSpouses, getParents, getChildren, getSiblings, getChildrenInLaw, get
 import { getPhotosByMember } from '@/actions/photos';
 import { RelationshipManager } from '@/components/members/RelationshipManager';
 import { RemoveRelationshipButton } from '@/components/members/RemoveRelationshipButton';
+import { LocationMap } from '@/components/members/LocationMap';
 
 export default async function MemberDetailPage({
   params,
@@ -169,6 +170,33 @@ export default async function MemberDetailPage({
                       {member.address}
                     </p>
                   )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Location Map */}
+          {member.location_lat && member.location_lng && (
+            <>
+              <Separator className="bg-amber-100" />
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-semibold text-amber-800 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-amber-400" />
+                    Lokasi
+                  </h2>
+                  <a
+                    href={`https://www.google.com/maps?q=${member.location_lat},${member.location_lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-800 transition-colors font-medium"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Buka di Google Maps
+                  </a>
+                </div>
+                <div className="rounded-xl overflow-hidden shadow-sm">
+                  <LocationMap lat={member.location_lat} lng={member.location_lng} />
                 </div>
               </div>
             </>

@@ -15,6 +15,8 @@ export interface FamilyMember {
   facebook: string | null;
   twitter: string | null;
   linkedin: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
   generation: number;
   created_at: string;
   updated_at: string;
