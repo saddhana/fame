@@ -15,7 +15,7 @@ export function MemberCard({ member }: { member: FamilyMember }) {
       className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-amber-100/50 shadow-sm hover:shadow-md hover:border-amber-200/50 transition-all duration-300 overflow-hidden"
     >
       {/* Photo */}
-      <div className="aspect-square relative bg-gradient-to-br from-amber-100 to-orange-50 overflow-hidden">
+      <div className="aspect-square relative bg-linear-to-br from-amber-100 to-orange-50 overflow-hidden">
         {member.profile_photo_url ? (
           <Image
             src={member.profile_photo_url}

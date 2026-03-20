@@ -22,7 +22,7 @@ export default async function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-50 to-yellow-50" />
+        <div className="absolute inset-0 bg-linear-to-br from-amber-100/80 via-orange-50 to-yellow-50" />
         <div className="absolute inset-0">
           <div className="absolute top-10 right-20 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-10 w-72 h-72 bg-orange-200/20 rounded-full blur-3xl" />
@@ -30,7 +30,7 @@ export default async function HomePage() {
 
         <div className="relative max-w-5xl mx-auto px-6 py-16 lg:py-24">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-600/25 mb-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-600/25 mb-6">
               <TreePine className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-amber-950 tracking-tight mb-3">
@@ -59,7 +59,7 @@ export default async function HomePage() {
               key={stat.label}
               className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-amber-100/50 text-center"
             >
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} shadow-sm mb-2`}>
+              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br ${stat.color} shadow-sm mb-2`}>
                 <stat.icon className="w-5 h-5 text-white" />
               </div>
               <p className="text-2xl font-bold text-amber-950">{stat.value}</p>
@@ -79,7 +79,7 @@ export default async function HomePage() {
               icon: GitBranch,
               title: 'Lihat Silsilah Keluarga',
               desc: 'Jelajahi pohon keluarga interaktif dengan visualisasi yang indah',
-              color: 'bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100',
+              color: 'bg-linear-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100',
               iconColor: 'from-amber-500 to-orange-500',
             },
             {
@@ -87,7 +87,7 @@ export default async function HomePage() {
               icon: Users,
               title: 'Daftar Anggota Keluarga',
               desc: 'Lihat profil, biodata, dan hubungan setiap anggota keluarga',
-              color: 'bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100',
+              color: 'bg-linear-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100',
               iconColor: 'from-emerald-500 to-teal-500',
             },
             {
@@ -95,7 +95,7 @@ export default async function HomePage() {
               icon: Camera,
               title: 'Galeri Foto Keluarga',
               desc: 'Koleksi foto-foto berharga momen keluarga kita',
-              color: 'bg-gradient-to-br from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100',
+              color: 'bg-linear-to-br from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100',
               iconColor: 'from-rose-400 to-pink-500',
             },
             {
@@ -103,7 +103,7 @@ export default async function HomePage() {
               icon: Users,
               title: 'Tambah Anggota Baru',
               desc: 'Daftarkan anggota keluarga baru ke dalam silsilah',
-              color: 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
+              color: 'bg-linear-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
               iconColor: 'from-blue-500 to-indigo-500',
             },
           ].map((item) => (
@@ -113,7 +113,7 @@ export default async function HomePage() {
               className={`${item.color} rounded-2xl p-5 border border-white/50 shadow-sm transition-all duration-200 group`}
             >
               <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.iconColor} flex items-center justify-center shadow-sm shrink-0`}>
+                <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${item.iconColor} flex items-center justify-center shadow-sm shrink-0`}>
                   <item.icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">

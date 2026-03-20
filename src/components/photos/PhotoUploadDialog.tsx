@@ -79,7 +79,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger
-        render={<Button className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20" />}
+        render={<Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20" />}
       >
         <Upload className="w-4 h-4 mr-2" />
         Unggah Foto
@@ -198,7 +198,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
             <Button
               type="submit"
               disabled={isPending || !uploadedUrl}
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+              className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>

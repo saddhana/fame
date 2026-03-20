@@ -168,7 +168,7 @@ export function FamilyTreeClient({
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.1}
         maxZoom={2}
-        className="bg-gradient-to-br from-amber-50/50 via-orange-50/30 to-stone-50"
+        className="bg-linear-to-br from-amber-50/50 via-orange-50/30 to-stone-50"
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -191,7 +191,7 @@ export function FamilyTreeClient({
         <Panel position="top-left" className="!ml-4 !mt-4">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
                 <GitBranch className="w-4 h-4 text-white" />
               </div>
               <div>

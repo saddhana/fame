@@ -111,7 +111,7 @@ export function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLightboxPr
         {/* Caption bar */}
         {(photo.caption || photo.taken_date || photo.event_name) && (
           <div
-            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12"
+            className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6 pt-12"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="max-w-2xl mx-auto text-center">

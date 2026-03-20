@@ -72,7 +72,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Photo Upload */}
       <div className="flex flex-col items-center gap-4">
-        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 to-orange-50 border-2 border-dashed border-amber-200">
+        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 border-2 border-dashed border-amber-200">
           {photoUrl ? (
             <>
               <Image src={photoUrl} alt="Foto profil" fill className="object-cover" />
@@ -264,7 +264,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20"
+          className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20"
         >
           {isPending ? (
             <span className="flex items-center gap-2">

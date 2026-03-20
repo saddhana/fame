@@ -31,11 +31,11 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-amber-900 via-amber-950 to-stone-900 text-amber-100 min-h-screen fixed left-0 top-0 z-40">
+    <aside className="hidden lg:flex flex-col w-64 bg-linear-to-b from-amber-900 via-amber-950 to-stone-900 text-amber-100 min-h-screen fixed left-0 top-0 z-40">
       {/* Logo */}
       <div className="p-6 border-b border-amber-800/50">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-600/20 group-hover:shadow-amber-600/40 transition-shadow">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-600/20 group-hover:shadow-amber-600/40 transition-shadow">
             <TreePine className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -66,7 +66,7 @@ export function Sidebar() {
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-r-full"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-amber-400 to-orange-500 rounded-r-full"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}

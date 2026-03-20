@@ -5,7 +5,7 @@ export default function Loading() {
     <div className="min-h-screen">
       {/* Hero skeleton */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-50 to-yellow-50" />
+        <div className="absolute inset-0 bg-linear-to-br from-amber-100/80 via-orange-50 to-yellow-50" />
         <div className="relative max-w-5xl mx-auto px-6 py-16 lg:py-24 text-center">
           <Skeleton className="w-20 h-20 rounded-2xl mx-auto mb-6 bg-amber-200/50" />
           <Skeleton className="h-12 w-48 mx-auto mb-3 bg-amber-200/50" />

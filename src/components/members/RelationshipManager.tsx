@@ -186,7 +186,7 @@ export function RelationshipManager({ memberId, memberName }: RelationshipManage
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+              className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>

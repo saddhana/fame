@@ -55,7 +55,7 @@ export default async function MemberDetailPage({
 
       {/* Profile Card */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-amber-100/50 shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-amber-100/80 to-orange-50 p-6 sm:p-8">
+        <div className="bg-linear-to-r from-amber-100/80 to-orange-50 p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             {/* Photo */}
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-white shadow-lg ring-4 ring-white/80 shrink-0">
@@ -68,7 +68,7 @@ export default async function MemberDetailPage({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-50">
+                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-amber-100 to-orange-50">
                   <User className="w-12 h-12 text-amber-300/60" />
                 </div>
               )}

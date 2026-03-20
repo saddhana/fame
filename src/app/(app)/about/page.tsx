@@ -7,7 +7,7 @@ export default function AboutPage() {
     <div className="max-w-3xl mx-auto px-6 py-8">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-600/20">
+        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-amber-600 to-orange-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-600/20">
           <TreePine className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-amber-950">FAME</h1>

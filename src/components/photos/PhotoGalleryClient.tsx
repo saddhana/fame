@@ -110,7 +110,7 @@ export function PhotoGalleryClient({
 
                 {/* Caption overlay */}
                 {photo.caption && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <p className="text-xs text-white truncate">{photo.caption}</p>
                   </div>
                 )}
