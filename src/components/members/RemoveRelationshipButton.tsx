@@ -43,9 +43,9 @@ export function RemoveRelationshipButton({
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
         title="Hapus hubungan"
-        className="ml-auto shrink-0 rounded-md p-1 text-amber-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+        className="ml-auto shrink-0 rounded-md p-2 text-amber-300 hover:text-red-500 hover:bg-red-50 transition-colors active:scale-90"
       >
-        <Trash2 className="w-3 h-3" />
+        <Trash2 className="w-4 h-4" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -53,10 +53,10 @@ export function RemoveRelationshipButton({
           <DialogHeader>
             <DialogTitle className="text-amber-950">Hapus Hubungan</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-amber-800/70 mt-1">
+          <p className="text-lg text-amber-800/70 mt-1">
             Hapus hubungan dengan <span className="font-semibold text-amber-900">{label}</span>? Tindakan ini tidak dapat dibatalkan.
           </p>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
             <DialogClose
               render={
                 <Button variant="outline" className="border-amber-200 text-amber-700" />
@@ -67,7 +67,7 @@ export function RemoveRelationshipButton({
             <Button
               onClick={handleConfirm}
               disabled={isPending}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white text-lg sm:text-base py-5 sm:py-2.5"
             >
               {isPending ? 'Menghapus...' : 'Hapus'}
             </Button>

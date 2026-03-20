@@ -15,13 +15,13 @@ export default async function EditMemberPage({
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
-      <Link href={`/members/${id}`} className="flex items-center gap-2 text-amber-600 hover:text-amber-700 text-sm font-medium mb-6">
-        <ArrowLeft className="w-4 h-4" />
+      <Link href={`/members/${id}`} className="flex items-center gap-2 text-amber-600 hover:text-amber-700 text-base font-medium mb-6">
+        <ArrowLeft className="w-5 h-5" />
         Kembali ke profil
       </Link>
 
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-amber-100/50 shadow-sm p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-amber-950 flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-amber-950 flex items-center gap-3 mb-6">
           <div className="w-9 h-9 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
             <Edit className="w-4 h-4 text-white" />
           </div>

@@ -38,24 +38,24 @@ export default async function MembersPage({
   const generations = [...new Set(members.map((m) => m.generation))].sort();
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-amber-950 flex items-center gap-3">
+          <h1 className="text-2xl lg:text-3xl font-bold text-amber-950 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
               <Users className="w-5 h-5 text-white" />
             </div>
             Anggota Keluarga
           </h1>
-          <p className="text-sm text-amber-600/70 mt-1 ml-13">
+          <p className="text-base text-amber-600/70 mt-1 ml-13">
             {members.length} anggota terdaftar
           </p>
         </div>
 
         <Link href="/members/new">
-          <Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button className="w-full sm:w-auto bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20 text-base py-5 sm:py-2 sm:text-sm">
+            <Plus className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
             Tambah Anggota
           </Button>
         </Link>
@@ -70,19 +70,19 @@ export default async function MembersPage({
       {filtered.length === 0 ? (
         <div className="text-center py-20">
           <Search className="w-12 h-12 text-amber-300/60 mx-auto mb-4" />
-          <p className="text-amber-700/70 font-medium">
+          <p className="text-lg text-amber-700/70 font-medium">
             {members.length === 0
               ? 'Belum ada anggota keluarga terdaftar'
               : 'Tidak ditemukan anggota yang sesuai'}
           </p>
-          <p className="text-sm text-amber-600/50 mt-1">
+          <p className="text-base text-amber-600/50 mt-1">
             {members.length === 0
               ? 'Mulai dengan menambahkan anggota keluarga pertama'
               : 'Coba ubah kata kunci pencarian'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
           {filtered.map((member) => (
             <MemberCard key={member.id} member={member} />
           ))}

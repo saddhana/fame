@@ -33,10 +33,10 @@ function MemberNodeComponent({ data }: NodeProps) {
           }
         `}
       >
-        <div className="flex items-center gap-3 p-3">
+        <div className="flex items-center gap-3 p-3.5">
           {/* Avatar */}
           <div className={`
-            w-10 h-10 rounded-lg overflow-hidden shrink-0 ring-2
+            w-11 h-11 rounded-lg overflow-hidden shrink-0 ring-2
             ${isDeceased
               ? 'ring-stone-200'
               : isMale
@@ -48,8 +48,8 @@ function MemberNodeComponent({ data }: NodeProps) {
               <Image
                 src={member.profile_photo_url}
                 alt={member.full_name}
-                width={40}
-                height={40}
+                width={44}
+                height={44}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -65,11 +65,11 @@ function MemberNodeComponent({ data }: NodeProps) {
 
           {/* Info */}
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-amber-950 truncate max-w-30 group-hover:text-amber-700 transition-colors">
+            <p className="text-base font-semibold text-amber-950 truncate max-w-30 group-hover:text-amber-700 transition-colors">
               {member.full_name}
             </p>
             {member.nickname && (
-              <p className="text-[10px] text-amber-600/60 truncate max-w-30">
+              <p className="text-sm text-amber-600/60 truncate max-w-30">
                 &ldquo;{member.nickname}&rdquo;
               </p>
             )}
@@ -78,7 +78,7 @@ function MemberNodeComponent({ data }: NodeProps) {
                 inline-block w-1.5 h-1.5 rounded-full
                 ${isDeceased ? 'bg-stone-400' : 'bg-emerald-400'}
               `} />
-              <span className="text-[9px] text-amber-500">
+              <span className="text-xs text-amber-500">
                 Gen {member.generation}
                 {member.birth_date && ` • ${new Date(member.birth_date).getFullYear()}`}
               </span>

@@ -30,6 +30,9 @@ export default function RootLayout({
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
       <body className="min-h-full bg-linear-to-br from-amber-50/50 via-orange-50/30 to-stone-50">
         <TooltipProvider>
           {children}

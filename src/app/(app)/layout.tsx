@@ -11,7 +11,7 @@ export default function AppLayout({
   return (
     <>
       <Sidebar />
-      <main className="lg:ml-64 min-h-screen pb-20 lg:pb-0">
+      <main className="lg:ml-64 min-h-screen pb-24 lg:pb-0">
         {children}
       </main>
       <MobileNav />

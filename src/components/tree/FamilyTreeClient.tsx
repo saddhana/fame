@@ -27,8 +27,8 @@ const nodeTypes: NodeTypes = {
   junction: JunctionNode,
 };
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 100;
+const NODE_WIDTH = 240;
+const NODE_HEIGHT = 115;
 const COUPLE_GAP = 60;
 
 function getLayoutedElements(
@@ -313,17 +313,17 @@ export function FamilyTreeClient({
                 <GitBranch className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-amber-950">Silsilah Keluarga</h1>
-                <p className="text-[10px] text-amber-600/60">{members.length} anggota</p>
+                <h1 className="text-lg font-bold text-amber-950">Silsilah Keluarga</h1>
+                <p className="text-sm text-amber-600/60">{members.length} anggota</p>
               </div>
             </div>
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400" />
               <Input
                 placeholder="Cari nama..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-8 h-8 text-sm border-amber-200 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-400/20"
+                className="pl-8 h-10 text-base border-amber-200 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-400/20"
               />
             </div>
           </div>
@@ -331,7 +331,7 @@ export function FamilyTreeClient({
 
         {/* Legend */}
         <Panel position="bottom-left" className="ml-4! mb-4!">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3 text-xs space-y-1.5">
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3 text-sm space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 bg-amber-700 rounded" />
               <span className="text-amber-700">Orang tua → Anak</span>

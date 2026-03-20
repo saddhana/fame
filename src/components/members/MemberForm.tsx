@@ -72,10 +72,10 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Photo Upload */}
       <div className="flex flex-col items-center gap-4">
-        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 border-2 border-dashed border-amber-200">
+        <div className="relative w-36 h-36 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 border-2 border-dashed border-amber-200">
           {photoUrl ? (
             <>
               <Image src={photoUrl} alt="Foto profil" fill className="object-cover" />
@@ -116,7 +116,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           }}
         >
           {({ open }) => (
-            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-amber-200 text-amber-700 hover:bg-amber-50">
+            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2.5 px-4">
               <Upload className="w-4 h-4 mr-2" />
               {photoUrl ? 'Ganti Foto' : 'Unggah Foto'}
             </Button>
@@ -125,9 +125,9 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Basic Info */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="full_name" className="text-amber-800">Nama Lengkap *</Label>
+          <Label htmlFor="full_name" className="text-amber-800 text-base">Nama Lengkap *</Label>
           <Input
             id="full_name"
             name="full_name"
@@ -139,7 +139,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nickname" className="text-amber-800">Nama Panggilan</Label>
+          <Label htmlFor="nickname" className="text-amber-800 text-base">Nama Panggilan</Label>
           <Input
             id="nickname"
             name="nickname"
@@ -150,7 +150,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="gender" className="text-amber-800">Jenis Kelamin *</Label>
+          <Label htmlFor="gender" className="text-amber-800 text-base">Jenis Kelamin *</Label>
           <Select name="gender" defaultValue={member?.gender || 'L'}>
             <SelectTrigger className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20">
               <SelectValue />
@@ -163,7 +163,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="birth_date" className="text-amber-800">Tanggal Lahir</Label>
+          <Label htmlFor="birth_date" className="text-amber-800 text-base">Tanggal Lahir</Label>
           <Input
             id="birth_date"
             name="birth_date"
@@ -174,7 +174,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="birth_place" className="text-amber-800">Tempat Lahir</Label>
+          <Label htmlFor="birth_place" className="text-amber-800 text-base">Tempat Lahir</Label>
           <Input
             id="birth_place"
             name="birth_place"
@@ -185,20 +185,20 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2 sm:col-span-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
+          <label className="flex items-center gap-3 cursor-pointer select-none py-1">
             <input
               type="checkbox"
               checked={isDeceased}
               onChange={(e) => setIsDeceased(e.target.checked)}
-              className="w-4 h-4 rounded border-amber-300 accent-amber-600"
+              className="w-5 h-5 rounded border-amber-300 accent-amber-600"
             />
-            <span className="text-sm text-amber-800">Sudah meninggal dunia</span>
+            <span className="text-lg text-amber-800">Sudah meninggal dunia</span>
           </label>
         </div>
 
         {isDeceased && (
           <div className="space-y-2">
-            <Label htmlFor="death_date" className="text-amber-800">Tanggal Meninggal</Label>
+            <Label htmlFor="death_date" className="text-amber-800 text-base">Tanggal Meninggal</Label>
             <Input
               id="death_date"
               name="death_date"
@@ -212,9 +212,9 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Contact */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-amber-800">Telepon</Label>
+          <Label htmlFor="phone" className="text-amber-800 text-base">Telepon</Label>
           <Input
             id="phone"
             name="phone"
@@ -226,7 +226,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-amber-800">Email</Label>
+          <Label htmlFor="email" className="text-amber-800 text-base">Email</Label>
           <Input
             id="email"
             name="email"
@@ -238,7 +238,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
 
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address" className="text-amber-800">Alamat</Label>
+          <Label htmlFor="address" className="text-amber-800 text-base">Alamat</Label>
           <Textarea
             id="address"
             name="address"
@@ -252,7 +252,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
 
       {/* Bio */}
       <div className="space-y-2">
-        <Label htmlFor="bio" className="text-amber-800">Biografi Singkat</Label>
+        <Label htmlFor="bio" className="text-amber-800 text-base">Biografi Singkat</Label>
         <Textarea
           id="bio"
           name="bio"
@@ -264,19 +264,19 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Submit */}
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.back()}
-          className="border-amber-200 text-amber-700 hover:bg-amber-50"
+          className="border-amber-200 text-amber-700 hover:bg-amber-50 text-lg py-5 sm:py-2.5 sm:text-base"
         >
           Batal
         </Button>
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20"
+          className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20 text-lg py-5 sm:py-2.5 sm:text-base"
         >
           {isPending ? (
             <span className="flex items-center gap-2">

@@ -41,15 +41,15 @@ export default async function MemberDetailPage({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
       {/* Back + Edit */}
-      <div className="flex items-center justify-between mb-6">
-        <Link href="/members" className="flex items-center gap-2 text-amber-600 hover:text-amber-700 text-sm font-medium">
-          <ArrowLeft className="w-4 h-4" />
+      <div className="flex items-center justify-between mb-5">
+        <Link href="/members" className="flex items-center gap-2 text-amber-600 hover:text-amber-700 text-base font-medium active:scale-95 transition-transform">
+          <ArrowLeft className="w-5 h-5" />
           Kembali
         </Link>
         <Link href={`/members/${id}/edit`}>
-          <Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50">
+          <Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-3">
             <Edit className="w-4 h-4 mr-2" />
             Edit
           </Button>
@@ -58,8 +58,8 @@ export default async function MemberDetailPage({
 
       {/* Profile Card */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-amber-100/50 shadow-sm overflow-hidden">
-        <div className="bg-linear-to-r from-amber-100/80 to-orange-50 p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <div className="bg-linear-to-r from-amber-100/80 to-orange-50 p-5 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
             {/* Photo */}
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-white shadow-lg ring-4 ring-white/80 shrink-0">
               {member.profile_photo_url ? (
@@ -80,7 +80,7 @@ export default async function MemberDetailPage({
             {/* Name & basic info */}
             <div className="text-center sm:text-left">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-amber-950">{member.full_name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-amber-950">{member.full_name}</h1>
                 <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
                   Gen {member.generation}
                 </Badge>
@@ -92,10 +92,10 @@ export default async function MemberDetailPage({
               </div>
 
               {member.nickname && (
-                <p className="text-amber-600/70">&ldquo;{member.nickname}&rdquo;</p>
+                <p className="text-lg text-amber-600/70">&ldquo;{member.nickname}&rdquo;</p>
               )}
 
-              <div className="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-sm text-amber-700/70">
+              <div className="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-base text-amber-700/70">
                 {member.birth_date && (
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" />
@@ -111,7 +111,7 @@ export default async function MemberDetailPage({
               </div>
 
               {member.death_date && (
-                <p className="text-sm text-stone-500 mt-1 flex items-center gap-1.5 justify-center sm:justify-start">
+                <p className="text-base text-stone-500 mt-1 flex items-center gap-1.5 justify-center sm:justify-start">
                   <Calendar className="w-3.5 h-3.5" />
                   Meninggal: {formatDate(member.death_date)}
                 </p>
@@ -120,12 +120,12 @@ export default async function MemberDetailPage({
           </div>
         </div>
 
-        <div className="p-6 sm:p-8 space-y-6">
+        <div className="p-5 sm:p-8 space-y-6">
           {/* Bio */}
           {member.bio && (
             <div>
-              <h2 className="text-sm font-semibold text-amber-800 mb-2">Biografi</h2>
-              <p className="text-amber-800/70 leading-relaxed whitespace-pre-wrap">{member.bio}</p>
+              <h2 className="text-base font-semibold text-amber-800 mb-2">Biografi</h2>
+              <p className="text-lg text-amber-800/70 leading-relaxed whitespace-pre-wrap">{member.bio}</p>
             </div>
           )}
 
@@ -134,22 +134,22 @@ export default async function MemberDetailPage({
             <>
               <Separator className="bg-amber-100" />
               <div>
-                <h2 className="text-sm font-semibold text-amber-800 mb-3">Kontak</h2>
-                <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-amber-800 mb-3">Kontak</h2>
+                <div className="space-y-2.5">
                   {member.phone && (
-                    <p className="text-sm text-amber-700/70 flex items-center gap-2">
+                    <p className="text-base text-amber-700/70 flex items-center gap-2">
                       <Phone className="w-4 h-4 text-amber-400" />
                       {member.phone}
                     </p>
                   )}
                   {member.email && (
-                    <p className="text-sm text-amber-700/70 flex items-center gap-2">
+                    <p className="text-base text-amber-700/70 flex items-center gap-2">
                       <Mail className="w-4 h-4 text-amber-400" />
                       {member.email}
                     </p>
                   )}
                   {member.address && (
-                    <p className="text-sm text-amber-700/70 flex items-center gap-2">
+                    <p className="text-base text-amber-700/70 flex items-center gap-2">
                       <HomeIcon className="w-4 h-4 text-amber-400" />
                       {member.address}
                     </p>
@@ -163,7 +163,7 @@ export default async function MemberDetailPage({
           <Separator className="bg-amber-100" />
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-amber-800">Hubungan Keluarga</h2>
+              <h2 className="text-lg font-semibold text-amber-800">Hubungan Keluarga</h2>
               <RelationshipManager memberId={id} memberName={member.full_name} />
             </div>
 
@@ -221,7 +221,7 @@ export default async function MemberDetailPage({
             <>
               <Separator className="bg-amber-100" />
               <div>
-                <h2 className="text-sm font-semibold text-amber-800 mb-3">Foto ({photos.length})</h2>
+                <h2 className="text-base font-semibold text-amber-800 mb-3">Foto ({photos.length})</h2>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {photos.slice(0, 8).map((photo) => (
                     <div key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-amber-50">
@@ -260,32 +260,32 @@ function RelationSection({
 }) {
   return (
     <div className="bg-amber-50/50 rounded-xl p-4">
-      <h3 className="text-xs font-medium text-amber-600/70 flex items-center gap-1.5 mb-2">
+      <h3 className="text-base font-medium text-amber-600/70 flex items-center gap-1.5 mb-3">
         {icon}
         {title}
       </h3>
       {members.length === 0 ? (
-        <p className="text-xs text-amber-400">Belum ada data</p>
+        <p className="text-base text-amber-400">Belum ada data</p>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {members.map((m) => (
             <div key={m.id} className="flex items-center gap-2">
               <Link
                 href={`/members/${m.id}`}
-                className="flex items-center gap-2 text-sm text-amber-800 hover:text-amber-600 transition-colors min-w-0 flex-1"
+                className="flex items-center gap-2.5 text-lg text-amber-800 hover:text-amber-600 transition-colors min-w-0 flex-1 py-1 active:scale-[0.98]"
               >
-                <div className="w-6 h-6 rounded-full overflow-hidden bg-amber-200/50 shrink-0">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-amber-200/50 shrink-0">
                   {m.profile_photo_url ? (
-                    <Image src={m.profile_photo_url} alt="" width={24} height={24} className="w-full h-full object-cover" />
+                    <Image src={m.profile_photo_url} alt="" width={32} height={32} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-3 h-3 text-amber-400" />
+                      <User className="w-3.5 h-3.5 text-amber-400" />
                     </div>
                   )}
                 </div>
                 <span className="truncate">{m.full_name}</span>
                 {'_badge' in m && m._badge && (
-                  <Badge variant="outline" className="text-[10px] border-amber-200 text-amber-500 shrink-0">
+                  <Badge variant="outline" className="text-xs border-amber-200 text-amber-500 shrink-0">
                     {m._badge}
                   </Badge>
                 )}

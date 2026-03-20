@@ -273,7 +273,7 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogTrigger
-        render={<Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50" />}
+        render={<Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-3" />}
       >
         <Plus className="w-4 h-4 mr-1" />
         Tambah
@@ -288,7 +288,7 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
 
         {step === 'suggestions' ? (
           <div className="mt-2 space-y-4">
-            <p className="text-sm text-amber-700/80">
+            <p className="text-lg text-amber-700/80">
               Centang hubungan yang ingin ditambahkan secara otomatis:
             </p>
             <div className="space-y-3">
@@ -300,9 +300,9 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
                     onChange={() => setSuggestions(prev =>
                       prev.map(p => p.id === s.id ? { ...p, checked: !p.checked } : p)
                     )}
-                    className="mt-0.5 w-4 h-4 rounded border-amber-300 accent-amber-600 shrink-0"
+                    className="mt-0.5 w-5 h-5 rounded border-amber-300 accent-amber-600 shrink-0"
                   />
-                  <span className="text-sm text-amber-900 group-hover:text-amber-700 leading-snug">{s.label}</span>
+                  <span className="text-lg text-amber-900 group-hover:text-amber-700 leading-snug">{s.label}</span>
                 </label>
               ))}
             </div>
@@ -328,7 +328,7 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label className="text-amber-800">Jenis Hubungan</Label>
+            <Label className="text-amber-800 text-base">Jenis Hubungan</Label>
             <Select name="type" value={relType} onValueChange={(v) => v && setRelType(v)}>
               <SelectTrigger className="border-amber-200">
                 <SelectValue>{relTypeLabels[relType]}</SelectValue>
@@ -342,13 +342,13 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-amber-800">Pilih Anggota</Label>
+            <Label className="text-amber-800 text-base">Pilih Anggota</Label>
             <input type="hidden" name="related_id" value={selectedMemberId} />
             <div ref={comboRef} className="relative">
               <button
                 type="button"
                 onClick={() => setComboOpen((o) => !o)}
-                className="w-full flex items-center justify-between rounded-lg border border-amber-200 bg-transparent px-3 py-2 text-sm text-left outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400/20"
+                className="w-full flex items-center justify-between rounded-lg border border-amber-200 bg-transparent px-3 py-3 text-lg sm:text-base text-left outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400/20"
               >
                 <span className={selectedMemberId ? 'text-foreground' : 'text-muted-foreground'}>
                   {selectedMemberId
@@ -366,17 +366,17 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
                       placeholder="Cari nama..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full rounded-md border border-amber-200 bg-amber-50/50 px-3 py-1.5 text-sm outline-none focus:border-amber-400"
+                      className="w-full rounded-md border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-lg sm:text-base outline-none focus:border-amber-400"
                     />
                   </div>
-                  <ul className="max-h-48 overflow-y-auto py-1">
+                  <ul className="max-h-56 overflow-y-auto py-1">
                     {filteredMembers.length === 0 ? (
-                      <li className="px-3 py-2 text-sm text-muted-foreground">Tidak ada anggota ditemukan</li>
+                      <li className="px-3 py-3 text-lg sm:text-base text-muted-foreground">Tidak ada anggota ditemukan</li>
                     ) : filteredMembers.map((m) => (
                       <li
                         key={m.id}
                         onClick={() => { setSelectedMemberId(m.id); setComboOpen(false); setSearch(''); }}
-                        className={`px-3 py-2 text-sm cursor-pointer hover:bg-amber-50 flex items-center justify-between ${
+                        className={`px-3 py-3 text-lg sm:text-base cursor-pointer hover:bg-amber-50 flex items-center justify-between ${
                           selectedMemberId === m.id ? 'bg-amber-50 font-medium text-amber-700' : ''
                         }`}
                       >
@@ -392,7 +392,7 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
           {relType === 'spouse' && (
             <>
               <div className="space-y-2">
-                <Label className="text-amber-800">Tanggal Pernikahan (opsional)</Label>
+                <Label className="text-amber-800 text-base">Tanggal Pernikahan (opsional)</Label>
                 <Input
                   name="marriage_date"
                   type="date"
@@ -401,7 +401,7 @@ export function RelationshipManager({ memberId }: RelationshipManagerProps) {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-amber-800">Pernikahan ke- (opsional)</Label>
+                <Label className="text-amber-800 text-base">Pernikahan ke- (opsional)</Label>
                 <Input
                   name="marriage_order"
                   type="number"
