@@ -28,13 +28,13 @@ export default async function GalleryPage({
     <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-amber-950 flex items-center gap-3">
+        <h1 className="text-2xl lg:text-3xl font-bold text-amber-950 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-linear-to-br from-rose-400 to-pink-500 flex items-center justify-center shadow-sm">
             <Camera className="w-5 h-5 text-white" />
           </div>
           Galeri Foto
         </h1>
-        <p className="text-sm text-amber-600/70 mt-1 ml-[52px]">
+        <p className="text-base text-amber-600/70 mt-1 ml-13">
           {photos.length} foto tersimpan
         </p>
       </div>
