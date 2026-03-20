@@ -131,18 +131,18 @@ export async function getSiblings(memberId: string): Promise<FamilyMember[]> {
 
 export async function getChildrenInLaw(
   memberId: string,
-): Promise<FamilyMember[]> {
-  // Children's spouses
+): Promise<(FamilyMember & { _spouseBirthDate: string | null })[]> {
+  // Children's spouses — carries child's birth_date for sorting
   const children = await getChildren(memberId);
   if (!children.length) return [];
-  const results: FamilyMember[] = [];
+  const results: (FamilyMember & { _spouseBirthDate: string | null })[] = [];
   const seen = new Set<string>();
   for (const child of children) {
     const spouses = await getSpouses(child.id);
     for (const s of spouses) {
       if (!seen.has(s.id)) {
         seen.add(s.id);
-        results.push(s);
+        results.push({ ...s, _spouseBirthDate: child.birth_date });
       }
     }
   }

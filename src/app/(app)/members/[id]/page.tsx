@@ -40,6 +40,21 @@ export default async function MemberDetailPage({
     return format(new Date(date), 'd MMMM yyyy', { locale: idLocale });
   };
 
+  const dateCmp = (a: string | null, b: string | null) => {
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    return new Date(a).getTime() - new Date(b).getTime();
+  };
+  const genderFirst = (x: { gender: string }, y: { gender: string }) =>
+    (x.gender === 'L' ? 0 : 1) - (y.gender === 'L' ? 0 : 1);
+
+  parents.sort(genderFirst);
+  parentsInLaw.sort(genderFirst);
+  children.sort((a, b) => dateCmp(a.birth_date, b.birth_date));
+  siblings.sort((a, b) => dateCmp(a.birth_date, b.birth_date));
+  childrenInLaw.sort((a, b) => dateCmp(a._spouseBirthDate, b._spouseBirthDate));
+
   return (
     <div className="max-w-4xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
       {/* Back + Edit */}
@@ -164,7 +179,6 @@ export default async function MemberDetailPage({
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-amber-800">Hubungan Keluarga</h2>
-              <RelationshipManager memberId={id} memberName={member.full_name} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,6 +187,7 @@ export default async function MemberDetailPage({
                 icon={<Users className="w-4 h-4" />}
                 title="Orang Tua"
                 members={parents}
+                addButton={<RelationshipManager memberId={id} memberName={member.full_name} defaultRelType="parent" />}
               />
 
               {/* Spouses */}
@@ -184,6 +199,7 @@ export default async function MemberDetailPage({
                   _relationshipId: s.relationship.id,
                   _badge: !s.relationship.is_active ? 'Bercerai' : s.relationship.marriage_order && s.relationship.marriage_order > 1 ? `Pernikahan ke-${s.relationship.marriage_order}` : undefined,
                 }))}
+                addButton={<RelationshipManager memberId={id} memberName={member.full_name} defaultRelType="spouse" />}
               />
 
               {/* Children */}
@@ -191,6 +207,7 @@ export default async function MemberDetailPage({
                 icon={<Heart className="w-4 h-4" />}
                 title="Anak"
                 members={children}
+                addButton={<RelationshipManager memberId={id} memberName={member.full_name} defaultRelType="child" />}
               />
 
               {/* Siblings */}
@@ -253,17 +270,22 @@ function RelationSection({
   icon,
   title,
   members,
+  addButton,
 }: {
   icon: React.ReactNode;
   title: string;
   members: (import('@/types').FamilyMember & { _badge?: string; _relationshipId?: string })[];
+  addButton?: React.ReactNode;
 }) {
   return (
     <div className="bg-amber-50/50 rounded-xl p-4">
-      <h3 className="text-base font-medium text-amber-600/70 flex items-center gap-1.5 mb-3">
-        {icon}
-        {title}
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-base font-medium text-amber-600/70 flex items-center gap-1.5">
+          {icon}
+          {title}
+        </h3>
+        {addButton}
+      </div>
       {members.length === 0 ? (
         <p className="text-base text-amber-400">Belum ada data</p>
       ) : (

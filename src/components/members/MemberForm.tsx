@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { User, Upload, X } from 'lucide-react';
+import { User, Upload, X, UserCircle, Phone, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createMember, updateMember } from '@/actions/members';
 import type { FamilyMember } from '@/types';
 
@@ -34,6 +33,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   const [isPending, startTransition] = useTransition();
   const [photoUrl, setPhotoUrl] = useState(member?.profile_photo_url || '');
   const [isDeceased, setIsDeceased] = useState(!!member?.death_date);
+  const [gender, setGender] = useState<'L' | 'P'>(member?.gender || 'L');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -44,7 +44,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       nickname: (formData.get('nickname') as string) || null,
       birth_date: (formData.get('birth_date') as string) || null,
       death_date: isDeceased ? ((formData.get('death_date') as string) || null) : null,
-      gender: (formData.get('gender') as 'L' | 'P') || 'L',
+      gender,
       birth_place: (formData.get('birth_place') as string) || null,
       phone: (formData.get('phone') as string) || null,
       email: (formData.get('email') as string) || null,
@@ -72,10 +72,10 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Photo Upload */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-36 h-36 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 border-2 border-dashed border-amber-200">
+      <div className="flex flex-col items-center gap-3 py-2">
+        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 ring-4 ring-white shadow-lg">
           {photoUrl ? (
             <>
               <Image src={photoUrl} alt="Foto profil" fill className="object-cover" />
@@ -116,17 +116,22 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           }}
         >
           {({ open }) => (
-            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2.5 px-4">
-              <Upload className="w-4 h-4 mr-2" />
+            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-4">
+              <Upload className="w-3.5 h-3.5 mr-1.5" />
               {photoUrl ? 'Ganti Foto' : 'Unggah Foto'}
             </Button>
           )}
         </CldUploadWidget>
       </div>
 
-      {/* Basic Info */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="space-y-2 sm:col-span-2">
+      {/* Data Diri */}
+      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+          <UserCircle className="w-3.5 h-3.5" />
+          Data Diri
+        </h2>
+
+        <div className="space-y-2">
           <Label htmlFor="full_name" className="text-amber-800 text-base">Nama Lengkap *</Label>
           <Input
             id="full_name"
@@ -138,63 +143,81 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="nickname" className="text-amber-800 text-base">Nama Panggilan</Label>
-          <Input
-            id="nickname"
-            name="nickname"
-            defaultValue={member?.nickname || ''}
-            placeholder="Nama panggilan"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="gender" className="text-amber-800 text-base">Jenis Kelamin *</Label>
-          <Select name="gender" defaultValue={member?.gender || 'L'}>
-            <SelectTrigger className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="L">Laki-laki</SelectItem>
-              <SelectItem value="P">Perempuan</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="birth_date" className="text-amber-800 text-base">Tanggal Lahir</Label>
-          <Input
-            id="birth_date"
-            name="birth_date"
-            type="date"
-            defaultValue={member?.birth_date || ''}
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="birth_place" className="text-amber-800 text-base">Tempat Lahir</Label>
-          <Input
-            id="birth_place"
-            name="birth_place"
-            defaultValue={member?.birth_place || ''}
-            placeholder="Kota kelahiran"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
-          <label className="flex items-center gap-3 cursor-pointer select-none py-1">
-            <input
-              type="checkbox"
-              checked={isDeceased}
-              onChange={(e) => setIsDeceased(e.target.checked)}
-              className="w-5 h-5 rounded border-amber-300 accent-amber-600"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="nickname" className="text-amber-800 text-base">Nama Panggilan</Label>
+            <Input
+              id="nickname"
+              name="nickname"
+              defaultValue={member?.nickname || ''}
+              placeholder="Nama panggilan"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
             />
-            <span className="text-lg text-amber-800">Sudah meninggal dunia</span>
-          </label>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-amber-800 text-base">Jenis Kelamin *</Label>
+            <input type="hidden" name="gender" value={gender} />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setGender('L')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                  gender === 'L'
+                    ? 'bg-amber-600 text-white border-amber-600'
+                    : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                }`}
+              >
+                ♂ Laki-laki
+              </button>
+              <button
+                type="button"
+                onClick={() => setGender('P')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                  gender === 'P'
+                    ? 'bg-rose-500 text-white border-rose-500'
+                    : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                }`}
+              >
+                ♀ Perempuan
+              </button>
+            </div>
+          </div>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="birth_date" className="text-amber-800 text-base">Tanggal Lahir</Label>
+            <Input
+              id="birth_date"
+              name="birth_date"
+              type="date"
+              defaultValue={member?.birth_date || ''}
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="birth_place" className="text-amber-800 text-base">Tempat Lahir</Label>
+            <Input
+              id="birth_place"
+              name="birth_place"
+              defaultValue={member?.birth_place || ''}
+              placeholder="Kota kelahiran"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
+        </div>
+
+        <label className="flex items-center gap-3 cursor-pointer select-none py-0.5">
+          <input
+            type="checkbox"
+            checked={isDeceased}
+            onChange={(e) => setIsDeceased(e.target.checked)}
+            className="w-5 h-5 rounded border-amber-300 accent-amber-600"
+          />
+          <span className="text-base text-amber-800">Sudah meninggal dunia</span>
+        </label>
 
         {isDeceased && (
           <div className="space-y-2">
@@ -208,36 +231,42 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             />
           </div>
         )}
-
       </div>
 
-      {/* Contact */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <Label htmlFor="phone" className="text-amber-800 text-base">Telepon</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            defaultValue={member?.phone || ''}
-            placeholder="08xxxxxxxxxx"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
+      {/* Kontak & Alamat */}
+      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+          <Phone className="w-3.5 h-3.5" />
+          Kontak & Alamat
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-amber-800 text-base">Telepon</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              defaultValue={member?.phone || ''}
+              placeholder="08xxxxxxxxxx"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-amber-800 text-base">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              defaultValue={member?.email || ''}
+              placeholder="email@contoh.com"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-amber-800 text-base">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            defaultValue={member?.email || ''}
-            placeholder="email@contoh.com"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
-          />
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="address" className="text-amber-800 text-base">Alamat</Label>
           <Textarea
             id="address"
@@ -250,9 +279,12 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         </div>
       </div>
 
-      {/* Bio */}
-      <div className="space-y-2">
-        <Label htmlFor="bio" className="text-amber-800 text-base">Biografi Singkat</Label>
+      {/* Biografi */}
+      <div className="bg-amber-50/50 rounded-xl p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5" />
+          Biografi
+        </h2>
         <Textarea
           id="bio"
           name="bio"
@@ -264,7 +296,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Submit */}
-      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-1">
         <Button
           type="button"
           variant="outline"
