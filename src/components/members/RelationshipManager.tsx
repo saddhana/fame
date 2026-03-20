@@ -216,6 +216,10 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
           address: null,
           bio: null,
           profile_photo_url: null,
+          instagram: null,
+          facebook: null,
+          twitter: null,
+          linkedin: null,
         });
         setMembers(prev => [...prev, newMember]);
         setSelectedMemberId(newMember.id);

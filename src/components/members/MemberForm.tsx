@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { User, Upload, X, UserCircle, Phone, FileText } from 'lucide-react';
+import { User, Upload, X, UserCircle, Phone, FileText, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,6 +51,10 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       address: (formData.get('address') as string) || null,
       bio: (formData.get('bio') as string) || null,
       profile_photo_url: photoUrl || null,
+      instagram: (formData.get('instagram') as string) || null,
+      facebook: (formData.get('facebook') as string) || null,
+      twitter: (formData.get('twitter') as string) || null,
+      linkedin: (formData.get('linkedin') as string) || null,
     };
 
     startTransition(async () => {
@@ -276,6 +280,66 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 resize-none"
             rows={2}
           />
+        </div>
+      </div>
+
+      {/* Media Sosial */}
+      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+          <Share2 className="w-3.5 h-3.5" />
+          Media Sosial
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="instagram" className="text-amber-800 text-base">Instagram</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-sm select-none">@</span>
+              <Input
+                id="instagram"
+                name="instagram"
+                defaultValue={member?.instagram || ''}
+                placeholder="username"
+                className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="twitter" className="text-amber-800 text-base">Twitter / X</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-sm select-none">@</span>
+              <Input
+                id="twitter"
+                name="twitter"
+                defaultValue={member?.twitter || ''}
+                placeholder="username"
+                className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="facebook" className="text-amber-800 text-base">Facebook</Label>
+            <Input
+              id="facebook"
+              name="facebook"
+              defaultValue={member?.facebook || ''}
+              placeholder="username atau URL profil"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="linkedin" className="text-amber-800 text-base">LinkedIn</Label>
+            <Input
+              id="linkedin"
+              name="linkedin"
+              defaultValue={member?.linkedin || ''}
+              placeholder="username atau URL profil"
+              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            />
+          </div>
         </div>
       </div>
 

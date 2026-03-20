@@ -93,8 +93,19 @@ export default function AboutPage() {
 
           <Separator className="bg-amber-100/50 my-4" />
 
+          <Separator className="bg-amber-100/50 my-4" />
+
           <p className="text-xs text-center text-amber-600/50">
-            Dibuat dengan <Heart className="w-3 h-3 inline text-rose-400" /> untuk keluarga besar kita
+            Dibuat oleh{' '}
+            <a
+              href="https://github.com/saddhana"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-amber-600/70 hover:text-amber-700 transition-colors underline underline-offset-2"
+            >
+              Saddhana Arta Daniswara
+            </a>{' '}
+            dengan <Heart className="w-3 h-3 inline text-rose-400" /> untuk keluarga besar kita
           </p>
         </CardContent>
       </Card>

@@ -11,6 +11,10 @@ export interface FamilyMember {
   address: string | null;
   bio: string | null;
   profile_photo_url: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  twitter: string | null;
+  linkedin: string | null;
   generation: number;
   created_at: string;
   updated_at: string;
