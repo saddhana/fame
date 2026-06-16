@@ -226,6 +226,7 @@ function FamilyTreeInner({
   relationships: Relationship[];
 }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [panelOpen, setPanelOpen] = useState(false);
   const { fitView } = useReactFlow();
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
@@ -309,7 +310,7 @@ function FamilyTreeInner({
         color="#d1d5db"
         className="opacity-60"
       />
-      {/* MiniMap — bottom-left like Google Maps */}
+      {/* MiniMap — hidden on mobile */}
       <MiniMap
         position="bottom-left"
         nodeColor={(node) => {
@@ -320,7 +321,7 @@ function FamilyTreeInner({
         }}
         nodeStrokeWidth={0}
         maskColor="rgba(241,245,249,0.7)"
-        className="bg-white! border-stone-200! shadow-md! rounded-xl!"
+        className="bg-white! border-stone-200! shadow-md! rounded-xl! hidden! sm:block!"
         style={{ marginLeft: '1rem', marginBottom: '1rem' }}
       />
 
@@ -331,17 +332,34 @@ function FamilyTreeInner({
         style={{ marginRight: '1rem', marginBottom: '1rem' }}
       />
 
-      {/* Search panel */}
-      <Panel position="top-left" className="ml-4! mt-4!">
-        <div className="bg-white rounded-xl shadow-md border border-stone-200 p-3">
+      {/* Search panel — collapses to icon on mobile */}
+      <Panel position="top-left" className="ml-3! mt-3! sm:ml-4! sm:mt-4!">
+        {/* Mobile: collapsed icon button */}
+        {!panelOpen && (
+          <button
+            onClick={() => setPanelOpen(true)}
+            className="sm:hidden w-11 h-11 rounded-xl bg-white shadow-md border border-stone-200 flex items-center justify-center"
+          >
+            <Search className="w-5 h-5 text-emerald-600" />
+          </button>
+        )}
+        {/* Full panel — always visible on sm+, toggle on mobile */}
+        <div className={`bg-white rounded-xl shadow-md border border-stone-200 p-3 ${panelOpen ? 'block' : 'hidden sm:block'}`}>
           <div className="flex items-center gap-3 mb-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-sm shrink-0">
               <GitBranch className="w-4 h-4 text-white" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h1 className="text-sm font-bold text-stone-900">Silsilah Keluarga</h1>
               <p className="text-xs text-stone-400">{members.length} anggota</p>
             </div>
+            {/* Close button — mobile only */}
+            <button
+              onClick={() => setPanelOpen(false)}
+              className="sm:hidden w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:bg-stone-100"
+            >
+              <span className="text-lg leading-none">×</span>
+            </button>
           </div>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
@@ -353,7 +371,6 @@ function FamilyTreeInner({
               className="pl-8 h-9 text-sm border-stone-200 bg-stone-50 focus:border-emerald-400"
             />
           </div>
-          {/* Reset / fit view button */}
           <button
             onClick={handleReset}
             className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium text-stone-500 hover:text-emerald-700 hover:bg-emerald-50 border border-stone-200 hover:border-emerald-200 transition-colors"
@@ -364,8 +381,8 @@ function FamilyTreeInner({
         </div>
       </Panel>
 
-      {/* Legend — bottom-right above controls */}
-      <Panel position="bottom-right" className="mr-14! mb-4!">
+      {/* Legend — hidden on mobile */}
+      <Panel position="bottom-right" className="mr-14! mb-4! hidden! sm:flex!">
         <div className="bg-white rounded-xl shadow-md border border-stone-200 px-3 py-2.5 text-xs flex items-center gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-0.5 bg-emerald-600 rounded" />

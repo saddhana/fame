@@ -24,11 +24,11 @@ const icons = {
   death: <Sunset className="w-3.5 h-3.5" />,
 };
 
-const colors = {
+const colors: Record<LifeEvent['type'], string> = {
   birth:      'bg-emerald-100 text-emerald-600 border-emerald-200',
-  marriage:   'bg-rose-100   text-rose-600   border-rose-200',
-  child_born: 'bg-amber-100  text-amber-600  border-amber-200',
-  death:      'bg-stone-100  text-stone-500  border-stone-200',
+  marriage:   'bg-rose-100 text-rose-600 border-rose-200',
+  child_born: 'bg-amber-100 text-amber-600 border-amber-200',
+  death:      'bg-stone-100 text-stone-500 border-stone-200',
 };
 
 export function EventsTimeline({
