@@ -31,12 +31,13 @@ interface RelationshipManagerProps {
   memberId: string;
   memberName: string;
   defaultRelType?: 'spouse' | 'parent' | 'child';
+  defaultOpen?: boolean;
 }
 
-export function RelationshipManager({ memberId, defaultRelType }: RelationshipManagerProps) {
+export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: RelationshipManagerProps) {
   const router = useRouter();
   const authed = useAuth();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen ?? false);
   const [isPending, startTransition] = useTransition();
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [search, setSearch] = useState('');
@@ -52,6 +53,8 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
   const [quickGender, setQuickGender] = useState<'L' | 'P'>('L');
   const [quickBirthDate, setQuickBirthDate] = useState('');
   const [isCreatingMember, startCreatingMember] = useTransition();
+  const [divorceDate, setDivorceDate] = useState('');
+  const [isActiveRel, setIsActiveRel] = useState(true);
 
   const relTypeLabels: Record<string, string> = {
     spouse: 'Pasangan (suami/istri)',
@@ -76,6 +79,8 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
       setQuickName('');
       setQuickGender('L');
       setQuickBirthDate('');
+      setDivorceDate('');
+      setIsActiveRel(true);
     }
     setOpen(isOpen);
   }
@@ -261,8 +266,8 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
             person2_id: relatedId,
             type: 'spouse',
             marriage_date: marriageDate || null,
-            divorce_date: null,
-            is_active: true,
+            divorce_date: !isActiveRel ? (divorceDate || null) : null,
+            is_active: isActiveRel,
             marriage_order: marriageOrder ? parseInt(marriageOrder) : 1,
           });
           toast.success('Pasangan berhasil ditambahkan!');
@@ -379,7 +384,7 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
                 type="button"
                 disabled={isSavingSuggestions || suggestions.every(s => !s.checked)}
                 onClick={handleSaveSuggestions}
-                className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 {isSavingSuggestions ? 'Menyimpan...' : 'Tambahkan'}
               </Button>
@@ -465,7 +470,7 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
                   type="button"
                   onClick={handleQuickCreate}
                   disabled={!quickName.trim() || isCreatingMember}
-                  className="w-full py-2.5 rounded-md bg-linear-to-r from-amber-600 to-orange-600 text-white text-sm font-medium disabled:opacity-50 hover:from-amber-700 hover:to-orange-700 transition-colors"
+                  className="w-full py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium disabled:opacity-50 hover:bg-emerald-700 transition-colors"
                 >
                   {isCreatingMember ? 'Membuat...' : '✓ Buat & Pilih'}
                 </button>
@@ -528,6 +533,17 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
                 )}
               </div>
             )}
+
+            {subMode === 'search' && (
+              <button
+                type="button"
+                onClick={() => enterQuickCreate('')}
+                className="mt-2 w-full flex items-center justify-center gap-2 text-sm text-amber-600 hover:text-amber-700 border border-dashed border-amber-200 rounded-lg py-2.5 hover:bg-amber-50 transition-colors"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Buat anggota baru
+              </button>
+            )}
           </div>
 
           {relType === 'spouse' && (
@@ -551,6 +567,28 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
                   className="border-amber-200"
                 />
               </div>
+
+              <label className="flex items-center gap-3 cursor-pointer select-none py-0.5">
+                <input
+                  type="checkbox"
+                  checked={!isActiveRel}
+                  onChange={(e) => setIsActiveRel(!e.target.checked)}
+                  className="w-5 h-5 rounded border-amber-300 accent-amber-600"
+                />
+                <span className="text-base text-amber-800">Sudah bercerai</span>
+              </label>
+
+              {!isActiveRel && (
+                <div className="space-y-2">
+                  <Label className="text-amber-800 text-base">Tanggal Cerai (opsional)</Label>
+                  <Input
+                    type="date"
+                    value={divorceDate}
+                    onChange={(e) => setDivorceDate(e.target.value)}
+                    className="border-amber-200"
+                  />
+                </div>
+              )}
             </>
           )}
 
@@ -561,7 +599,7 @@ export function RelationshipManager({ memberId, defaultRelType }: RelationshipMa
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>

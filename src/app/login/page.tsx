@@ -50,11 +50,11 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-orange-50 to-yellow-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-stone-50 via-slate-50 to-white px-4">
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-amber-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-yellow-100/20 rounded-full blur-3xl" />
       </div>
 
@@ -70,7 +70,7 @@ function LoginForm() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-linear-to-br from-amber-600 to-orange-700 shadow-lg shadow-amber-600/25 mb-4"
+            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-600 shadow-lg shadow-emerald-600/25 mb-4"
           >
             <TreePine className="w-10 h-10 text-amber-50" />
           </motion.div>
@@ -118,7 +118,7 @@ function LoginForm() {
             <Button
               type="submit"
               disabled={loading || !password}
-              className="w-full h-12 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-medium shadow-md shadow-amber-600/20 transition-all duration-200"
+              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-md shadow-emerald-600/20 transition-all duration-200"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

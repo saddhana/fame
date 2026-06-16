@@ -15,113 +15,103 @@ export default async function HomePage() {
     generationCount = generations.size;
     photoCount = await getPhotoCount();
   } catch {
-    // Supabase not configured yet — show demo state
+    // Supabase not configured yet
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-amber-100/80 via-orange-50 to-yellow-50" />
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-20 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-10 w-72 h-72 bg-orange-200/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="relative max-w-5xl mx-auto px-5 pt-16 pb-10 lg:pt-24 lg:pb-12 text-center">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-emerald-500 shadow-xl shadow-emerald-500/30 mb-6">
+          <TreePine className="w-10 h-10 text-white" />
         </div>
-
-        <div className="relative max-w-5xl mx-auto px-5 py-12 lg:py-24">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-600/25 mb-6">
-              <TreePine className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-amber-950 tracking-tight mb-3">
-              FAME
-            </h1>
-            <p className="text-lg lg:text-xl text-amber-700/80 flex items-center justify-center gap-2">
-              <Heart className="w-5 h-5 text-amber-500" />
-              Silsilah Keluarga Kita
-            </p>
-            <p className="mt-4 text-base lg:text-lg text-amber-800/60 max-w-lg mx-auto leading-relaxed">
-              Tempat kita menyimpan cerita, menghubungkan generasi, dan merayakan ikatan keluarga yang tak ternilai.
-            </p>
-          </div>
-        </div>
+        <h1 className="text-5xl lg:text-6xl font-bold text-stone-900 tracking-tight mb-3">
+          FAME
+        </h1>
+        <p className="text-lg text-stone-500 flex items-center justify-center gap-2 mb-4">
+          <Heart className="w-4 h-4 text-emerald-500" />
+          Silsilah Keluarga Kita
+        </p>
+        <p className="text-base text-stone-400 max-w-md mx-auto leading-relaxed">
+          Tempat kita menyimpan cerita, menghubungkan generasi, dan merayakan ikatan keluarga yang tak ternilai.
+        </p>
       </section>
 
       {/* Stats */}
-      <section className="max-w-5xl mx-auto px-5 -mt-6">
+      <section className="max-w-5xl mx-auto px-5 pb-10">
         <div className="grid grid-cols-3 gap-3 lg:gap-4">
           {[
-            { label: 'Anggota', value: memberCount, icon: Users, color: 'from-amber-500 to-orange-500' },
-            { label: 'Generasi', value: generationCount, icon: GitBranch, color: 'from-emerald-500 to-teal-500' },
-            { label: 'Foto', value: photoCount, icon: Camera, color: 'from-rose-400 to-pink-500' },
+            { label: 'Anggota', value: memberCount, icon: Users, bg: 'bg-violet-500' },
+            { label: 'Generasi', value: generationCount, icon: GitBranch, bg: 'bg-emerald-500' },
+            { label: 'Foto', value: photoCount, icon: Camera, bg: 'bg-rose-500' },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 lg:p-5 shadow-sm border border-amber-100/50 text-center"
+              className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm border border-stone-100 text-center"
             >
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br ${stat.color} shadow-sm mb-2`}>
+              <div className={`inline-flex items-center justify-center w-11 h-11 rounded-2xl ${stat.bg} shadow-sm mb-3`}>
                 <stat.icon className="w-5 h-5 text-white" />
               </div>
-              <p className="text-2xl lg:text-3xl font-bold text-amber-950">{stat.value}</p>
-              <p className="text-sm lg:text-base text-amber-600/70 font-medium">{stat.label}</p>
+              <p className="text-3xl lg:text-4xl font-bold text-stone-900 leading-none mb-1">{stat.value}</p>
+              <p className="text-sm text-stone-400 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Quick Actions */}
-      <section className="max-w-5xl mx-auto px-5 py-10 lg:py-12">
-        <h2 className="text-xl font-semibold text-amber-900 mb-5">Jelajahi</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section className="max-w-5xl mx-auto px-5 pb-12">
+        <h2 className="text-xl font-bold text-stone-800 mb-4">Jelajahi</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             {
               href: '/family-tree',
               icon: GitBranch,
               title: 'Lihat Silsilah Keluarga',
               desc: 'Jelajahi pohon keluarga interaktif dengan visualisasi yang indah',
-              color: 'bg-linear-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100',
-              iconColor: 'from-amber-500 to-orange-500',
+              accent: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-100',
+              iconBg: 'bg-emerald-500',
             },
             {
               href: '/members',
               icon: Users,
               title: 'Daftar Anggota Keluarga',
               desc: 'Lihat profil, biodata, dan hubungan setiap anggota keluarga',
-              color: 'bg-linear-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100',
-              iconColor: 'from-emerald-500 to-teal-500',
+              accent: 'bg-violet-50 hover:bg-violet-100 border-violet-100',
+              iconBg: 'bg-violet-500',
             },
             {
               href: '/gallery',
               icon: Camera,
               title: 'Galeri Foto Keluarga',
               desc: 'Koleksi foto-foto berharga momen keluarga kita',
-              color: 'bg-linear-to-br from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100',
-              iconColor: 'from-rose-400 to-pink-500',
+              accent: 'bg-rose-50 hover:bg-rose-100 border-rose-100',
+              iconBg: 'bg-rose-500',
             },
             {
               href: '/members/new',
               icon: Users,
               title: 'Tambah Anggota Baru',
               desc: 'Daftarkan anggota keluarga baru ke dalam silsilah',
-              color: 'bg-linear-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
-              iconColor: 'from-blue-500 to-indigo-500',
+              accent: 'bg-blue-50 hover:bg-blue-100 border-blue-100',
+              iconBg: 'bg-blue-500',
             },
           ].map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`${item.color} rounded-2xl p-5 border border-white/50 shadow-sm transition-all duration-200 group active:scale-[0.98]`}
+              className={`${item.accent} rounded-2xl p-5 border transition-all duration-150 group active:scale-[0.98]`}
             >
               <div className="flex items-start gap-4">
-                <div className={`w-11 h-11 rounded-xl bg-linear-to-br ${item.iconColor} flex items-center justify-center shadow-sm shrink-0`}>
+                <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center shadow-sm shrink-0`}>
                   <item.icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg text-amber-950 flex items-center gap-2">
+                  <h3 className="font-semibold text-stone-900 flex items-center gap-1.5 mb-1">
                     {item.title}
-                    <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3.5 h-3.5 text-stone-400 group-hover:translate-x-0.5 transition-transform" />
                   </h3>
-                  <p className="text-base text-amber-700/60 mt-1">{item.desc}</p>
+                  <p className="text-sm text-stone-500 leading-snug">{item.desc}</p>
                 </div>
               </div>
             </Link>

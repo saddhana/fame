@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { createMember, updateMember } from '@/actions/members';
+import { createMember, updateMember, getMembers } from '@/actions/members';
 import type { FamilyMember } from '@/types';
 
 interface MemberFormProps {
@@ -37,10 +37,37 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   const [gender, setGender] = useState<'L' | 'P'>(member?.gender || 'L');
   const [locationLat, setLocationLat] = useState<number | null>(member?.location_lat ?? null);
   const [locationLng, setLocationLng] = useState<number | null>(member?.location_lng ?? null);
+  const [birthDate, setBirthDate] = useState(member?.birth_date || '');
+  const [fullName, setFullName] = useState(member?.full_name || '');
+  const [allMembers, setAllMembers] = useState<FamilyMember[]>([]);
+
+  useEffect(() => {
+    getMembers().then(setAllMembers).catch(() => {});
+  }, []);
+
+  const duplicates = useMemo(() => {
+    const normalized = fullName.toLowerCase().trim();
+    if (normalized.length < 2) return [];
+    return allMembers.filter((m) => {
+      if (m.id === member?.id) return false;
+      const n = m.full_name.toLowerCase();
+      const nick = m.nickname?.toLowerCase() ?? '';
+      return n.includes(normalized) || normalized.includes(n) ||
+        (nick.length > 1 && (nick.includes(normalized) || normalized.includes(nick)));
+    });
+  }, [fullName, allMembers, member?.id]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    if (isDeceased && birthDate) {
+      const deathDateVal = formData.get('death_date') as string;
+      if (deathDateVal && new Date(deathDateVal) < new Date(birthDate)) {
+        toast.error('Tanggal meninggal tidak boleh sebelum tanggal lahir');
+        return;
+      }
+    }
 
     const data = {
       full_name: formData.get('full_name') as string,
@@ -84,7 +111,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Photo Upload */}
       <div className="flex flex-col items-center gap-3 py-2">
-        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-linear-to-br from-amber-100 to-orange-50 ring-4 ring-white shadow-lg">
+        <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-emerald-50 ring-4 ring-white shadow-lg">
           {photoUrl ? (
             <>
               <Image src={photoUrl} alt="Foto profil" fill className="object-cover" />
@@ -149,7 +176,18 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             defaultValue={member?.full_name}
             placeholder="Masukkan nama lengkap"
             className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            onChange={(e) => setFullName(e.target.value)}
           />
+          {duplicates.length > 0 && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 space-y-1">
+              <p className="text-xs font-medium text-amber-700">Anggota dengan nama serupa sudah ada:</p>
+              {duplicates.map((d) => (
+                <p key={d.id} className="text-xs text-amber-600">
+                  • {d.full_name}{d.nickname ? ` (${d.nickname})` : ''} — Gen {d.generation}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -202,6 +240,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
               name="birth_date"
               type="date"
               defaultValue={member?.birth_date || ''}
+              onChange={(e) => setBirthDate(e.target.value)}
               className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
             />
           </div>
@@ -289,9 +328,8 @@ export function MemberForm({ member, mode }: MemberFormProps) {
 
         {/* Location */}
         <div className="space-y-2">
-          <Label className="text-amber-800 text-base">
-            Lokasi
-          </Label>
+          <Label className="text-amber-800 text-base">Titik Lokasi di Peta</Label>
+          <p className="text-xs text-amber-500/60 -mt-1">Tandai titik di peta untuk menampilkan lokasi tempat tinggal saat ini di profil. Berbeda dari kolom Alamat di atas.</p>
           <LocationPicker
             lat={locationLat}
             lng={locationLng}
@@ -320,6 +358,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
                 className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
               />
             </div>
+            <p className="text-xs text-amber-500/60">Masukkan username saja, tanpa @</p>
           </div>
 
           <div className="space-y-2">
@@ -334,6 +373,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
                 className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
               />
             </div>
+            <p className="text-xs text-amber-500/60">Masukkan username saja, tanpa @</p>
           </div>
 
           <div className="space-y-2">
@@ -342,9 +382,10 @@ export function MemberForm({ member, mode }: MemberFormProps) {
               id="facebook"
               name="facebook"
               defaultValue={member?.facebook || ''}
-              placeholder="username atau URL profil"
+              placeholder="contoh: john.doe atau https://fb.com/john.doe"
               className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
             />
+            <p className="text-xs text-amber-500/60">Username atau URL profil lengkap</p>
           </div>
 
           <div className="space-y-2">
@@ -353,9 +394,10 @@ export function MemberForm({ member, mode }: MemberFormProps) {
               id="linkedin"
               name="linkedin"
               defaultValue={member?.linkedin || ''}
-              placeholder="username atau URL profil"
+              placeholder="contoh: john-doe atau https://linkedin.com/in/john-doe"
               className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
             />
+            <p className="text-xs text-amber-500/60">Username atau URL profil lengkap</p>
           </div>
         </div>
       </div>
@@ -389,7 +431,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20 text-lg py-5 sm:py-2.5 sm:text-base"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 text-lg py-5 sm:py-2.5 sm:text-base"
         >
           {isPending ? (
             <span className="flex items-center gap-2">

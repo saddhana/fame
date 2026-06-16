@@ -171,6 +171,79 @@ export async function getParentsInLaw(
   return results;
 }
 
+export type RelationshipPathStep = {
+  fromId: string;
+  fromName: string;
+  toId: string;
+  toName: string;
+  label: string; // e.g. "Ayah dari", "Pasangan dari"
+};
+
+export async function findRelationshipPath(
+  fromId: string,
+  toId: string,
+): Promise<RelationshipPathStep[] | null> {
+  if (fromId === toId) return [];
+
+  const [{ data: members }, { data: rels }] = await Promise.all([
+    supabase.from("family_members").select("id, full_name, gender"),
+    supabase.from("relationships").select("*"),
+  ]);
+
+  if (!members || !rels) return null;
+
+  const memberMap = new Map(members.map((m) => [m.id, m]));
+
+  type Edge = { to: string; label: (fromGender: "L" | "P") => string };
+  const graph = new Map<string, Edge[]>();
+  for (const m of members) graph.set(m.id, []);
+
+  for (const rel of rels) {
+    if (rel.type === "spouse") {
+      graph.get(rel.person1_id)?.push({ to: rel.person2_id, label: () => "Pasangan dari" });
+      graph.get(rel.person2_id)?.push({ to: rel.person1_id, label: () => "Pasangan dari" });
+    } else if (rel.type === "parent_child") {
+      // person1 is parent, person2 is child
+      graph.get(rel.person1_id)?.push({
+        to: rel.person2_id,
+        label: (g) => (g === "L" ? "Ayah dari" : "Ibu dari"),
+      });
+      graph.get(rel.person2_id)?.push({
+        to: rel.person1_id,
+        label: (g) => (g === "L" ? "Anak laki-laki dari" : "Anak perempuan dari"),
+      });
+    }
+  }
+
+  // BFS
+  const visited = new Set<string>([fromId]);
+  const queue: { id: string; path: RelationshipPathStep[] }[] = [{ id: fromId, path: [] }];
+
+  while (queue.length > 0) {
+    const { id, path } = queue.shift()!;
+    const edges = graph.get(id) ?? [];
+    for (const edge of edges) {
+      if (visited.has(edge.to)) continue;
+      visited.add(edge.to);
+      const fromMember = memberMap.get(id);
+      const toMember = memberMap.get(edge.to);
+      if (!fromMember || !toMember) continue;
+      const step: RelationshipPathStep = {
+        fromId: id,
+        fromName: fromMember.full_name,
+        toId: edge.to,
+        toName: toMember.full_name,
+        label: edge.label(fromMember.gender as "L" | "P"),
+      };
+      const newPath = [...path, step];
+      if (edge.to === toId) return newPath;
+      queue.push({ id: edge.to, path: newPath });
+    }
+  }
+
+  return null; // no connection found
+}
+
 export async function createRelationship(
   input: RelationshipInput,
 ): Promise<Relationship> {

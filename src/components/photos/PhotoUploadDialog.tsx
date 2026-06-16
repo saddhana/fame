@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import { Upload, Image as ImageIcon, Tag } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,11 +38,15 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
   const [uploadedUrl, setUploadedUrl] = useState('');
   const [publicId, setPublicId] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [taggedMemberIds, setTaggedMemberIds] = useState<string[]>([]);
+  const [showTagging, setShowTagging] = useState(false);
 
   function resetForm() {
     setUploadedUrl('');
     setPublicId('');
     setThumbnailUrl('');
+    setTaggedMemberIds([]);
+    setShowTagging(false);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -66,7 +70,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
           event_name: (formData.get('event_name') as string) || null,
           taken_date: (formData.get('taken_date') as string) || null,
           uploader_member_id: (formData.get('uploader_member_id') as string) || null,
-        });
+        }, taggedMemberIds.length ? taggedMemberIds : undefined);
 
         toast.success('Foto berhasil diunggah!');
         setOpen(false);
@@ -82,7 +86,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger
-        render={<Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20" onClick={(e: React.MouseEvent) => { if (!authed) { e.preventDefault(); router.push('/login?redirect=' + encodeURIComponent(window.location.pathname)); } }} />}
+        render={<Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20" onClick={(e: React.MouseEvent) => { if (!authed) { e.preventDefault(); router.push('/login?redirect=' + encodeURIComponent(window.location.pathname)); } }} />}
       >
         <Upload className="w-4 h-4 mr-2" />
         Unggah Foto
@@ -138,6 +142,48 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
               </CldUploadWidget>
             )}
           </div>
+
+          {/* Tag members */}
+          {members.length > 0 && (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setShowTagging((v) => !v)}
+                className="flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-700 transition-colors"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                Tandai anggota dalam foto
+                {taggedMemberIds.length > 0 && (
+                  <span className="ml-1 bg-amber-100 text-amber-700 text-xs font-medium px-1.5 py-0.5 rounded-full">
+                    {taggedMemberIds.length}
+                  </span>
+                )}
+              </button>
+              {showTagging && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 max-h-40 overflow-y-auto space-y-1.5">
+                  {members.map((m) => (
+                    <label key={m.id} className="flex items-center gap-2.5 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={taggedMemberIds.includes(m.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setTaggedMemberIds((prev) => [...prev, m.id]);
+                          } else {
+                            setTaggedMemberIds((prev) => prev.filter((id) => id !== m.id));
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-amber-300 accent-amber-600 shrink-0"
+                      />
+                      <span className="text-sm text-amber-900 group-hover:text-amber-700 truncate">
+                        {m.full_name}{m.nickname ? ` (${m.nickname})` : ''}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Caption */}
           <div className="space-y-2">
@@ -201,7 +247,7 @@ export function PhotoUploadDialog({ members }: { members: FamilyMember[] }) {
             <Button
               type="submit"
               disabled={isPending || !uploadedUrl}
-              className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>

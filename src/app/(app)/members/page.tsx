@@ -43,7 +43,7 @@ export default async function MembersPage({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-amber-950 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-sm">
               <Users className="w-5 h-5 text-white" />
             </div>
             Anggota Keluarga
@@ -54,7 +54,7 @@ export default async function MembersPage({
         </div>
 
         <Link href="/members/new">
-          <Button className="w-full sm:w-auto bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-600/20 text-base py-5 sm:py-2 sm:text-sm">
+          <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 text-base py-5 sm:py-2 sm:text-sm">
             <Plus className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
             Tambah Anggota
           </Button>

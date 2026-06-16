@@ -40,7 +40,7 @@ export default async function GalleryPage({
       </div>
 
       <Suspense fallback={<GallerySkeleton />}>
-        <PhotoGalleryClient photos={photos} members={members} />
+        <PhotoGalleryClient photos={photos} members={members} initialMember={params.member} />
       </Suspense>
     </div>
   );

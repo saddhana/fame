@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Camera, Search, ZoomIn } from 'lucide-react';
+import { Camera, Search, ZoomIn, User, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/components/AuthContext';
 import { PhotoUploadDialog } from './PhotoUploadDialog';
 import { PhotoLightbox } from './PhotoLightbox';
-import type { Photo, FamilyMember } from '@/types';
+import { EditPhotoDialog } from './EditPhotoDialog';
+import { deletePhoto } from '@/actions/photos';
+import type { PhotoWithTags, FamilyMember } from '@/types';
 
 const typeFilters = [
   { value: 'all', label: 'Semua' },
@@ -20,13 +25,20 @@ const typeFilters = [
 export function PhotoGalleryClient({
   photos,
   members,
+  initialMember,
 }: {
-  photos: Photo[];
+  photos: PhotoWithTags[];
   members: FamilyMember[];
+  initialMember?: string;
 }) {
+  const router = useRouter();
+  const authed = useAuth();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [memberFilter, setMemberFilter] = useState(initialMember || '');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<PhotoWithTags | null>(null);
+  const [, startDelete] = useTransition();
 
   const filtered = photos.filter((p) => {
     const matchesSearch =
@@ -34,8 +46,25 @@ export function PhotoGalleryClient({
       p.caption?.toLowerCase().includes(search.toLowerCase()) ||
       p.event_name?.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'all' || p.photo_type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesMember =
+      !memberFilter || p.tags?.some((t) => t.member_id === memberFilter);
+    return matchesSearch && matchesType && matchesMember;
   });
+
+  async function handleDelete(photoId: string) {
+    startDelete(async () => {
+      try {
+        await deletePhoto(photoId);
+        toast.success('Foto berhasil dihapus');
+        setLightboxIndex(null);
+        router.refresh();
+      } catch {
+        toast.error('Gagal menghapus foto');
+      }
+    });
+  }
+
+  const selectedMember = members.find((m) => m.id === memberFilter);
 
   return (
     <>
@@ -49,6 +78,25 @@ export function PhotoGalleryClient({
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 bg-white/80"
           />
+        </div>
+
+        {/* Member filter */}
+        <div className="relative">
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-200 bg-white/80 cursor-pointer min-w-40">
+            <User className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <select
+              value={memberFilter}
+              onChange={(e) => setMemberFilter(e.target.value)}
+              className="bg-transparent text-sm text-amber-800 outline-none cursor-pointer w-full"
+            >
+              <option value="">Semua anggota</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.full_name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex gap-2 flex-wrap items-center">
@@ -71,6 +119,20 @@ export function PhotoGalleryClient({
           <PhotoUploadDialog members={members} />
         </div>
       </div>
+
+      {/* Active member filter indicator */}
+      {selectedMember && (
+        <div className="flex items-center gap-2 mb-4 text-sm text-amber-700">
+          <span>Menampilkan foto dengan</span>
+          <span className="font-semibold">{selectedMember.full_name}</span>
+          <button
+            onClick={() => setMemberFilter('')}
+            className="text-amber-400 hover:text-amber-600 transition-colors text-xs underline"
+          >
+            Hapus filter
+          </button>
+        </div>
+      )}
 
       {/* Gallery grid */}
       {filtered.length === 0 ? (
@@ -114,10 +176,29 @@ export function PhotoGalleryClient({
                   </div>
                 )}
 
+                {/* Tag count badge + edit button */}
+                <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                  {photo.tags && photo.tags.length > 0 && (
+                    <Badge className="bg-black/50 text-white border-0 text-[10px] flex items-center gap-1">
+                      <User className="w-2.5 h-2.5" />
+                      {photo.tags.length}
+                    </Badge>
+                  )}
+                  {authed && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditingPhoto(photo); }}
+                      className="w-6 h-6 rounded-md bg-black/50 hover:bg-amber-600/80 flex items-center justify-center text-white transition-colors"
+                      title="Edit foto"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
                 {/* Type badge */}
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Badge className="bg-white/90 text-amber-700 border-0 text-[10px]">
-                    {photo.photo_type === 'family' ? 'Keluarga' : 
+                    {photo.photo_type === 'family' ? 'Keluarga' :
                      photo.photo_type === 'personal' ? 'Pribadi' : 'Acara'}
                   </Badge>
                 </div>
@@ -133,6 +214,17 @@ export function PhotoGalleryClient({
           photos={filtered}
           initialIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Edit dialog */}
+      {editingPhoto && (
+        <EditPhotoDialog
+          photo={editingPhoto}
+          members={members}
+          open={!!editingPhoto}
+          onClose={() => setEditingPhoto(null)}
         />
       )}
     </>

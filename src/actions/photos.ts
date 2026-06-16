@@ -6,10 +6,10 @@ import type { Photo, PhotoInput, PhotoWithTags } from "@/types";
 import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "@/lib/auth";
 
-export async function getPhotos(type?: string): Promise<Photo[]> {
+export async function getPhotos(type?: string): Promise<PhotoWithTags[]> {
   let query = supabase
     .from("photos")
-    .select("*")
+    .select("*, tags:photo_tags(*, member:family_members(*))")
     .order("created_at", { ascending: false });
 
   if (type && type !== "all") {
@@ -18,7 +18,7 @@ export async function getPhotos(type?: string): Promise<Photo[]> {
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return data || [];
+  return (data || []) as PhotoWithTags[];
 }
 
 export async function getPhotoById(id: string): Promise<PhotoWithTags | null> {
@@ -82,6 +82,37 @@ export async function createPhoto(
   revalidatePath("/gallery");
   revalidatePath("/");
   return photo;
+}
+
+export async function updatePhoto(
+  id: string,
+  input: Partial<PhotoInput>,
+  tagMemberIds?: string[],
+): Promise<Photo> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const db = createServerSupabase();
+
+  const { data, error } = await db
+    .from("photos")
+    .update(input)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  if (tagMemberIds !== undefined) {
+    await db.from("photo_tags").delete().eq("photo_id", id);
+    if (tagMemberIds.length > 0) {
+      await db.from("photo_tags").insert(
+        tagMemberIds.map((memberId) => ({ photo_id: id, member_id: memberId })),
+      );
+    }
+  }
+
+  revalidatePath("/gallery");
+  revalidatePath("/");
+  return data;
 }
 
 export async function deletePhoto(id: string): Promise<void> {

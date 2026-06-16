@@ -8,6 +8,8 @@ import {
   MiniMap,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
   type NodeTypes,
@@ -16,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
-import { Search, GitBranch, TreePine } from 'lucide-react';
+import { Search, GitBranch, TreePine, Maximize2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { MemberNode } from './MemberNode';
 import { JunctionNode } from './JunctionNode';
@@ -162,7 +164,7 @@ function getLayoutedElements(
           target: jId,
           targetHandle: 'top',
           type: 'straight',
-          style: { stroke: '#b45309', strokeWidth: 2 },
+          style: { stroke: '#16a34a', strokeWidth: 2 },
         });
         edges.push({
           id: `j-link-1-${idx}`,
@@ -171,7 +173,7 @@ function getLayoutedElements(
           target: jId,
           targetHandle: 'top',
           type: 'straight',
-          style: { stroke: '#b45309', strokeWidth: 2 },
+          style: { stroke: '#16a34a', strokeWidth: 2 },
         });
       }
     } else {
@@ -208,7 +210,7 @@ function getLayoutedElements(
         target: childId,
         targetHandle: 'top',
         type: 'smoothstep',
-        style: { stroke: '#b45309', strokeWidth: 2 },
+        style: { stroke: '#16a34a', strokeWidth: 2 },
       });
     }
   }
@@ -216,7 +218,7 @@ function getLayoutedElements(
   return { nodes, edges };
 }
 
-export function FamilyTreeClient({
+function FamilyTreeInner({
   members,
   relationships,
 }: {
@@ -224,6 +226,7 @@ export function FamilyTreeClient({
   relationships: Relationship[];
 }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { fitView } = useReactFlow();
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => getLayoutedElements(members, relationships),
@@ -232,6 +235,11 @@ export function FamilyTreeClient({
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+
+  const handleReset = useCallback(() => {
+    setNodes(initialNodes.map((n) => ({ ...n, style: { ...n.style, opacity: 1 } })));
+    setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 50);
+  }, [initialNodes, setNodes, fitView]);
 
   const handleSearch = useCallback(
     (query: string) => {
@@ -246,13 +254,17 @@ export function FamilyTreeClient({
       const lowerQuery = query.toLowerCase();
       setNodes((nds) =>
         nds.map((n) => {
-          const member = n.data.member as FamilyMember;
+          if (n.type === 'junction') {
+            return { ...n, style: { ...n.style, opacity: 0.35 } };
+          }
+          const member = n.data.member as FamilyMember | undefined;
+          if (!member) return n;
           const matches =
             member.full_name.toLowerCase().includes(lowerQuery) ||
             member.nickname?.toLowerCase().includes(lowerQuery);
           return {
             ...n,
-            style: { ...n.style, opacity: matches ? 1 : 0.2 },
+            style: { ...n.style, opacity: matches ? 1 : 0.35 },
           };
         })
       );
@@ -260,13 +272,133 @@ export function FamilyTreeClient({
     [setNodes]
   );
 
+  const handleSearchEnter = useCallback(() => {
+    if (!searchQuery) return;
+    const lowerQuery = searchQuery.toLowerCase();
+    const matches = nodes.filter((n) => {
+      if (n.type === 'junction') return false;
+      const member = n.data.member as FamilyMember | undefined;
+      if (!member) return false;
+      return (
+        member.full_name.toLowerCase().includes(lowerQuery) ||
+        member.nickname?.toLowerCase().includes(lowerQuery)
+      );
+    });
+    if (matches.length === 1) {
+      fitView({ nodes: [{ id: matches[0].id }], padding: 0.8, duration: 500, maxZoom: 1.5 });
+    }
+  }, [searchQuery, nodes, fitView]);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
+      fitView
+      fitViewOptions={{ padding: 0.2 }}
+      minZoom={0.1}
+      maxZoom={2}
+      className="bg-white"
+    >
+      <Background
+        variant={BackgroundVariant.Dots}
+        gap={24}
+        size={1}
+        color="#d1d5db"
+        className="opacity-60"
+      />
+      {/* MiniMap — bottom-left like Google Maps */}
+      <MiniMap
+        position="bottom-left"
+        nodeColor={(node) => {
+          if (node.type === 'junction') return '#d1fae5';
+          const m = node.data?.member as { gender?: string; death_date?: string } | undefined;
+          if (m?.death_date) return '#a8a29e';
+          return m?.gender === 'L' ? '#93c5fd' : '#fda4af';
+        }}
+        nodeStrokeWidth={0}
+        maskColor="rgba(241,245,249,0.7)"
+        className="bg-white! border-stone-200! shadow-md! rounded-xl!"
+        style={{ marginLeft: '1rem', marginBottom: '1rem' }}
+      />
+
+      {/* Controls — bottom-right */}
+      <Controls
+        position="bottom-right"
+        className="bg-white! border-stone-200! shadow-md! rounded-xl!"
+        style={{ marginRight: '1rem', marginBottom: '1rem' }}
+      />
+
+      {/* Search panel */}
+      <Panel position="top-left" className="ml-4! mt-4!">
+        <div className="bg-white rounded-xl shadow-md border border-stone-200 p-3">
+          <div className="flex items-center gap-3 mb-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-sm">
+              <GitBranch className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-stone-900">Silsilah Keluarga</h1>
+              <p className="text-xs text-stone-400">{members.length} anggota</p>
+            </div>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Input
+              placeholder="Cari nama..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchEnter()}
+              className="pl-8 h-9 text-sm border-stone-200 bg-stone-50 focus:border-emerald-400"
+            />
+          </div>
+          {/* Reset / fit view button */}
+          <button
+            onClick={handleReset}
+            className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium text-stone-500 hover:text-emerald-700 hover:bg-emerald-50 border border-stone-200 hover:border-emerald-200 transition-colors"
+          >
+            <Maximize2 className="w-3 h-3" />
+            Reset tampilan
+          </button>
+        </div>
+      </Panel>
+
+      {/* Legend — bottom-right above controls */}
+      <Panel position="bottom-right" className="mr-14! mb-4!">
+        <div className="bg-white rounded-xl shadow-md border border-stone-200 px-3 py-2.5 text-xs flex items-center gap-5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-0.5 bg-emerald-600 rounded" />
+            <span className="text-stone-600 font-medium">Orang tua → Anak</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-0.5 bg-red-500 rounded" />
+            <span className="text-stone-600 font-medium">Pasangan (aktif)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-0" style={{ borderTop: '2px dashed #9ca3af' }} />
+            <span className="text-stone-600 font-medium">Pasangan (bercerai)</span>
+          </div>
+        </div>
+      </Panel>
+    </ReactFlow>
+  );
+}
+
+export function FamilyTreeClient({
+  members,
+  relationships,
+}: {
+  members: FamilyMember[];
+  relationships: Relationship[];
+}) {
   if (members.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
-          <TreePine className="w-16 h-16 text-amber-300/60 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-amber-800">Silsilah Belum Ada</h2>
-          <p className="text-sm text-amber-600/60 mt-1 max-w-xs">
+          <TreePine className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-stone-700">Silsilah Belum Ada</h2>
+          <p className="text-sm text-stone-400 mt-1 max-w-xs">
             Tambahkan anggota keluarga terlebih dahulu untuk melihat pohon silsilah
           </p>
         </div>
@@ -276,77 +408,9 @@ export function FamilyTreeClient({
 
   return (
     <div className="h-screen w-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.1}
-        maxZoom={2}
-        className="bg-linear-to-br from-amber-50/50 via-orange-50/30 to-stone-50"
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={24}
-          size={1}
-          color="#d4a574"
-          className="opacity-30"
-        />
-        <Controls
-          className="bg-white/90! border-amber-200! shadow-lg! rounded-xl!"
-        />
-        <MiniMap
-          nodeStrokeColor="#b45309"
-          nodeColor="#fef3c7"
-          maskColor="rgba(255, 251, 235, 0.7)"
-          className="bg-white/90! border-amber-200! shadow-lg! rounded-xl!"
-        />
-
-        {/* Search panel */}
-        <Panel position="top-left" className="ml-4! mt-4!">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
-                <GitBranch className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-amber-950">Silsilah Keluarga</h1>
-                <p className="text-sm text-amber-600/60">{members.length} anggota</p>
-              </div>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400" />
-              <Input
-                placeholder="Cari nama..."
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-8 h-10 text-base border-amber-200 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-400/20"
-              />
-            </div>
-          </div>
-        </Panel>
-
-        {/* Legend */}
-        <Panel position="bottom-left" className="ml-4! mb-4!">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200/50 p-3 text-sm space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-amber-700 rounded" />
-              <span className="text-amber-700">Orang tua → Anak</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-red-600 rounded" />
-              <span className="text-amber-700">Pasangan (aktif)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-gray-400 rounded" style={{ borderTop: '2px dashed #9ca3af', height: 0 }} />
-              <span className="text-amber-700">Pasangan (bercerai)</span>
-            </div>
-          </div>
-        </Panel>
-      </ReactFlow>
+      <ReactFlowProvider>
+        <FamilyTreeInner members={members} relationships={relationships} />
+      </ReactFlowProvider>
     </div>
   );
 }
