@@ -439,8 +439,8 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
                     onClick={() => setQuickGender('L')}
                     className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${
                       quickGender === 'L'
-                        ? 'bg-amber-600 text-white border-amber-600'
-                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                     }`}
                   >
                     ♂ Laki-laki
@@ -451,7 +451,7 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
                     className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${
                       quickGender === 'P'
                         ? 'bg-rose-500 text-white border-rose-500'
-                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                        : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                     }`}
                   >
                     ♀ Perempuan
