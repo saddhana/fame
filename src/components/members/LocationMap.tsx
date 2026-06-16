@@ -21,7 +21,7 @@ export function LocationMap({ lat, lng }: LocationMapProps) {
   const center: LatLngTuple = [lat, lng];
 
   return (
-    <div className="rounded-xl overflow-hidden border border-amber-100" style={{ height: 220 }}>
+    <div className="rounded-xl overflow-hidden border border-stone-100" style={{ height: 220 }}>
       <MapContainer
         center={center}
         zoom={15}

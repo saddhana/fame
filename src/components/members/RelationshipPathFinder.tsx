@@ -208,7 +208,7 @@ export function RelationshipPathFinder({
               Tidak ditemukan hubungan antara keduanya.
             </div>
           ) : path.length === 0 ? (
-            <p className="text-sm text-amber-700 font-medium">Orang yang sama.</p>
+            <p className="text-sm text-emerald-700 font-medium">Orang yang sama.</p>
           ) : (
             <div className="space-y-3">
               {(() => {
@@ -217,7 +217,7 @@ export function RelationshipPathFinder({
                   <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm text-emerald-900">
                     <span className="font-semibold">{selectedMember?.full_name}</span>
                     {' '}adalah{' '}
-                    <span className="font-semibold text-amber-700">{kinship}</span>
+                    <span className="font-semibold text-emerald-700">{kinship}</span>
                     {' '}dari{' '}
                     <span className="font-semibold">{currentMemberName}</span>.
                   </div>
@@ -225,14 +225,14 @@ export function RelationshipPathFinder({
               })()}
               <ol className="space-y-2">
                 {path.map((step, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
-                    <ArrowRight className="w-3.5 h-3.5 mt-0.5 text-amber-400 shrink-0" />
+                  <li key={i} className="flex items-start gap-2 text-sm text-stone-700">
+                    <ArrowRight className="w-3.5 h-3.5 mt-0.5 text-stone-400 shrink-0" />
                     <span>
                       <Link href={`/members/${step.fromId}`} className="font-semibold hover:underline">
                         {step.fromName}
                       </Link>
                       {' '}
-                      <span className="text-amber-600/70">{step.label}</span>
+                      <span className="text-stone-500">{step.label}</span>
                       {' '}
                       <Link href={`/members/${step.toId}`} className="font-semibold hover:underline">
                         {step.toName}

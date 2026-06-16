@@ -17,7 +17,7 @@ import { EventsTimeline } from '@/components/members/EventsTimeline';
 import { RelationshipPathFinder } from '@/components/members/RelationshipPathFinder';
 import { RemoveRelationshipButton } from '@/components/members/RemoveRelationshipButton';
 import { EndMarriageButton } from '@/components/members/EndMarriageButton';
-import { LocationMap } from '@/components/members/LocationMap';
+import { LocationMap } from '@/components/members/LocationMapDynamic';
 
 export default async function MemberDetailPage({
   params,
@@ -101,6 +101,7 @@ export default async function MemberDetailPage({
                   alt={member.full_name}
                   width={128}
                   height={128}
+                  loading="eager"
                   className="w-full h-full object-cover"
                 />
               ) : (

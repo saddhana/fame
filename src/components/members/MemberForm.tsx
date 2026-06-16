@@ -6,7 +6,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { User, Upload, X, UserCircle, Phone, FileText, Share2 } from 'lucide-react';
-import { LocationPicker } from '@/components/members/LocationPicker';
+import { LocationPicker } from '@/components/members/LocationPickerDynamic';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -125,7 +125,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <User className="w-12 h-12 text-amber-300/60" />
+              <User className="w-12 h-12 text-stone-300" />
             </div>
           )}
         </div>
@@ -152,7 +152,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           }}
         >
           {({ open }) => (
-            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-amber-200 text-amber-700 hover:bg-amber-50 text-sm py-2 px-4">
+            <Button type="button" variant="outline" size="sm" onClick={() => open()} className="border-stone-200 text-stone-600 hover:bg-stone-50 text-sm py-2 px-4">
               <Upload className="w-3.5 h-3.5 mr-1.5" />
               {photoUrl ? 'Ganti Foto' : 'Unggah Foto'}
             </Button>
@@ -161,28 +161,28 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Data Diri */}
-      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+      <div className="bg-white rounded-xl border border-stone-100 p-5 space-y-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
           <UserCircle className="w-3.5 h-3.5" />
           Data Diri
         </h2>
 
         <div className="space-y-2">
-          <Label htmlFor="full_name" className="text-amber-800 text-base">Nama Lengkap *</Label>
+          <Label htmlFor="full_name" className="text-stone-700 text-base">Nama Lengkap *</Label>
           <Input
             id="full_name"
             name="full_name"
             required
             defaultValue={member?.full_name}
             placeholder="Masukkan nama lengkap"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+            className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             onChange={(e) => setFullName(e.target.value)}
           />
           {duplicates.length > 0 && (
-            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 space-y-1">
-              <p className="text-xs font-medium text-amber-700">Anggota dengan nama serupa sudah ada:</p>
+            <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-3 py-2 space-y-1">
+              <p className="text-xs font-medium text-yellow-700">Anggota dengan nama serupa sudah ada:</p>
               {duplicates.map((d) => (
-                <p key={d.id} className="text-xs text-amber-600">
+                <p key={d.id} className="text-xs text-yellow-600">
                   • {d.full_name}{d.nickname ? ` (${d.nickname})` : ''} — Gen {d.generation}
                 </p>
               ))}
@@ -192,18 +192,18 @@ export function MemberForm({ member, mode }: MemberFormProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="nickname" className="text-amber-800 text-base">Nama Panggilan</Label>
+            <Label htmlFor="nickname" className="text-stone-700 text-base">Nama Panggilan</Label>
             <Input
               id="nickname"
               name="nickname"
               defaultValue={member?.nickname || ''}
               placeholder="Nama panggilan"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-amber-800 text-base">Jenis Kelamin *</Label>
+            <Label className="text-stone-700 text-base">Jenis Kelamin *</Label>
             <input type="hidden" name="gender" value={gender} />
             <div className="flex gap-2">
               <button
@@ -211,8 +211,8 @@ export function MemberForm({ member, mode }: MemberFormProps) {
                 onClick={() => setGender('L')}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
                   gender === 'L'
-                    ? 'bg-amber-600 text-white border-amber-600'
-                    : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                 }`}
               >
                 ♂ Laki-laki
@@ -223,7 +223,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
                 className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
                   gender === 'P'
                     ? 'bg-rose-500 text-white border-rose-500'
-                    : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                    : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                 }`}
               >
                 ♀ Perempuan
@@ -234,25 +234,25 @@ export function MemberForm({ member, mode }: MemberFormProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="birth_date" className="text-amber-800 text-base">Tanggal Lahir</Label>
+            <Label htmlFor="birth_date" className="text-stone-700 text-base">Tanggal Lahir</Label>
             <Input
               id="birth_date"
               name="birth_date"
               type="date"
               defaultValue={member?.birth_date || ''}
               onChange={(e) => setBirthDate(e.target.value)}
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="birth_place" className="text-amber-800 text-base">Tempat Lahir</Label>
+            <Label htmlFor="birth_place" className="text-stone-700 text-base">Tempat Lahir</Label>
             <Input
               id="birth_place"
               name="birth_place"
               defaultValue={member?.birth_place || ''}
               placeholder="Kota kelahiran"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
         </div>
@@ -262,74 +262,90 @@ export function MemberForm({ member, mode }: MemberFormProps) {
             type="checkbox"
             checked={isDeceased}
             onChange={(e) => setIsDeceased(e.target.checked)}
-            className="w-5 h-5 rounded border-amber-300 accent-amber-600"
+            className="w-5 h-5 rounded border-stone-300 accent-emerald-600"
           />
-          <span className="text-base text-amber-800">Sudah meninggal dunia</span>
+          <span className="text-base text-stone-700">Sudah meninggal dunia</span>
         </label>
 
         {isDeceased && (
           <div className="space-y-2">
-            <Label htmlFor="death_date" className="text-amber-800 text-base">Tanggal Meninggal</Label>
+            <Label htmlFor="death_date" className="text-stone-700 text-base">Tanggal Meninggal</Label>
             <Input
               id="death_date"
               name="death_date"
               type="date"
               defaultValue={member?.death_date || ''}
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
         )}
       </div>
 
+      {/* Biografi */}
+      <div className="bg-white rounded-xl border border-stone-100 p-5 space-y-3 shadow-sm">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5" />
+          Biografi
+        </h2>
+        <Textarea
+          id="bio"
+          name="bio"
+          defaultValue={member?.bio || ''}
+          placeholder="Ceritakan sesuatu tentang anggota keluarga ini..."
+          className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 resize-none"
+          rows={4}
+        />
+      </div>
+
       {/* Kontak & Alamat */}
-      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+      <div className="bg-white rounded-xl border border-stone-100 p-5 space-y-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
           <Phone className="w-3.5 h-3.5" />
-          Kontak & Alamat
+          Kontak &amp; Alamat
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-amber-800 text-base">Telepon</Label>
+            <Label htmlFor="phone" className="text-stone-700 text-base">Telepon</Label>
             <Input
               id="phone"
               name="phone"
               type="tel"
               defaultValue={member?.phone || ''}
               placeholder="08xxxxxxxxxx"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-amber-800 text-base">Email</Label>
+            <Label htmlFor="email" className="text-stone-700 text-base">Email</Label>
             <Input
               id="email"
               name="email"
               type="email"
               defaultValue={member?.email || ''}
               placeholder="email@contoh.com"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address" className="text-amber-800 text-base">Alamat</Label>
+          <Label htmlFor="address" className="text-stone-700 text-base">Alamat</Label>
           <Textarea
             id="address"
             name="address"
             defaultValue={member?.address || ''}
             placeholder="Alamat tempat tinggal"
-            className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 resize-none"
+            className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 resize-none"
             rows={2}
           />
         </div>
 
         {/* Location */}
         <div className="space-y-2">
-          <Label className="text-amber-800 text-base">Titik Lokasi di Peta</Label>
-          <p className="text-xs text-amber-500/60 -mt-1">Tandai titik di peta untuk menampilkan lokasi tempat tinggal saat ini di profil. Berbeda dari kolom Alamat di atas.</p>
+          <Label className="text-stone-700 text-base">Titik Lokasi di Peta</Label>
+          <p className="text-xs text-stone-400 -mt-1">Tandai titik di peta untuk menampilkan lokasi tempat tinggal saat ini di profil. Berbeda dari kolom Alamat di atas.</p>
           <LocationPicker
             lat={locationLat}
             lng={locationLng}
@@ -339,83 +355,67 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       </div>
 
       {/* Media Sosial */}
-      <div className="bg-amber-50/50 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
+      <div className="bg-white rounded-xl border border-stone-100 p-5 space-y-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
           <Share2 className="w-3.5 h-3.5" />
           Media Sosial
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="instagram" className="text-amber-800 text-base">Instagram</Label>
+            <Label htmlFor="instagram" className="text-stone-700 text-base">Instagram</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-sm select-none">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm select-none">@</span>
               <Input
                 id="instagram"
                 name="instagram"
                 defaultValue={member?.instagram || ''}
                 placeholder="username"
-                className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
+                className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 pl-7"
               />
             </div>
-            <p className="text-xs text-amber-500/60">Masukkan username saja, tanpa @</p>
+            <p className="text-xs text-stone-400">Masukkan username saja, tanpa @</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="twitter" className="text-amber-800 text-base">Twitter / X</Label>
+            <Label htmlFor="twitter" className="text-stone-700 text-base">Twitter / X</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-sm select-none">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm select-none">@</span>
               <Input
                 id="twitter"
                 name="twitter"
                 defaultValue={member?.twitter || ''}
                 placeholder="username"
-                className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 pl-7"
+                className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 pl-7"
               />
             </div>
-            <p className="text-xs text-amber-500/60">Masukkan username saja, tanpa @</p>
+            <p className="text-xs text-stone-400">Masukkan username saja, tanpa @</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="facebook" className="text-amber-800 text-base">Facebook</Label>
+            <Label htmlFor="facebook" className="text-stone-700 text-base">Facebook</Label>
             <Input
               id="facebook"
               name="facebook"
               defaultValue={member?.facebook || ''}
               placeholder="contoh: john.doe atau https://fb.com/john.doe"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
-            <p className="text-xs text-amber-500/60">Username atau URL profil lengkap</p>
+            <p className="text-xs text-stone-400">Username atau URL profil lengkap</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="linkedin" className="text-amber-800 text-base">LinkedIn</Label>
+            <Label htmlFor="linkedin" className="text-stone-700 text-base">LinkedIn</Label>
             <Input
               id="linkedin"
               name="linkedin"
               defaultValue={member?.linkedin || ''}
               placeholder="contoh: john-doe atau https://linkedin.com/in/john-doe"
-              className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"
+              className="border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20"
             />
-            <p className="text-xs text-amber-500/60">Username atau URL profil lengkap</p>
+            <p className="text-xs text-stone-400">Username atau URL profil lengkap</p>
           </div>
         </div>
-      </div>
-
-      {/* Biografi */}
-      <div className="bg-amber-50/50 rounded-xl p-5 space-y-3">
-        <h2 className="text-sm font-semibold text-amber-600/70 uppercase tracking-wide flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5" />
-          Biografi
-        </h2>
-        <Textarea
-          id="bio"
-          name="bio"
-          defaultValue={member?.bio || ''}
-          placeholder="Ceritakan sesuatu tentang anggota keluarga ini..."
-          className="border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 resize-none"
-          rows={4}
-        />
       </div>
 
       {/* Submit */}
@@ -424,7 +424,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
           type="button"
           variant="outline"
           onClick={() => router.back()}
-          className="border-amber-200 text-amber-700 hover:bg-amber-50 text-lg py-5 sm:py-2.5 sm:text-base"
+          className="border-stone-200 text-stone-600 hover:bg-stone-50 text-lg py-5 sm:py-2.5 sm:text-base"
         >
           Batal
         </Button>
