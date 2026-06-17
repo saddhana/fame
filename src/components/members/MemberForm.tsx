@@ -33,7 +33,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [photoUrl, setPhotoUrl] = useState(member?.profile_photo_url || '');
-  const [isDeceased, setIsDeceased] = useState(!!member?.death_date);
+  const [isDeceased, setIsDeceased] = useState(member?.is_deceased ?? !!member?.death_date);
   const [gender, setGender] = useState<'L' | 'P'>(member?.gender || 'L');
   const [locationLat, setLocationLat] = useState<number | null>(member?.location_lat ?? null);
   const [locationLng, setLocationLng] = useState<number | null>(member?.location_lng ?? null);
@@ -74,6 +74,7 @@ export function MemberForm({ member, mode }: MemberFormProps) {
       nickname: (formData.get('nickname') as string) || null,
       birth_date: (formData.get('birth_date') as string) || null,
       death_date: isDeceased ? ((formData.get('death_date') as string) || null) : null,
+      is_deceased: isDeceased,
       gender,
       birth_place: (formData.get('birth_place') as string) || null,
       phone: (formData.get('phone') as string) || null,

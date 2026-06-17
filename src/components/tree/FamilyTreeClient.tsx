@@ -315,8 +315,8 @@ function FamilyTreeInner({
         position="bottom-left"
         nodeColor={(node) => {
           if (node.type === 'junction') return '#d1fae5';
-          const m = node.data?.member as { gender?: string; death_date?: string } | undefined;
-          if (m?.death_date) return '#a8a29e';
+          const m = node.data?.member as { gender?: string; death_date?: string; is_deceased?: boolean } | undefined;
+          if (m?.is_deceased || m?.death_date) return '#a8a29e';
           return m?.gender === 'L' ? '#93c5fd' : '#fda4af';
         }}
         nodeStrokeWidth={0}

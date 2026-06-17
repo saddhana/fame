@@ -12,7 +12,7 @@ function MemberNodeComponent({ data }: NodeProps) {
   const member = data.member as FamilyMember;
 
   const isMale = member.gender === 'L';
-  const isDeceased = !!member.death_date;
+  const isDeceased = member.is_deceased || !!member.death_date;
 
   const accentColor = isDeceased ? '#a8a29e' : isMale ? '#3b82f6' : '#f43f5e';
   const avatarBg = isDeceased ? 'bg-stone-100' : isMale ? 'bg-blue-50' : 'bg-rose-50';
@@ -50,7 +50,7 @@ function MemberNodeComponent({ data }: NodeProps) {
           {/* Info */}
           <div className="min-w-0">
             <p className="text-sm font-bold text-stone-900 truncate max-w-35 group-hover:text-emerald-700 transition-colors">
-              {isDeceased && <span className="text-stone-400 mr-0.5 text-xs">†</span>}
+              {isDeceased && <span className="text-stone-400 mr-1 text-xs font-medium">{isMale ? 'Alm.' : 'Almh.'}</span>}
               {member.full_name}
             </p>
             {member.nickname && (

@@ -24,12 +24,14 @@ const icons = {
   death: <Sunset className="w-3.5 h-3.5" />,
 };
 
-const colors: Record<LifeEvent['type'], string> = {
-  birth:      'bg-emerald-100 text-emerald-600 border-emerald-200',
-  marriage:   'bg-rose-100 text-rose-600 border-rose-200',
-  child_born: 'bg-amber-100 text-amber-600 border-amber-200',
-  death:      'bg-stone-100 text-stone-500 border-stone-200',
-};
+function dotColor(type: LifeEvent['type']): string {
+  switch (type) {
+    case 'birth':      return 'bg-emerald-100 text-emerald-600 border-emerald-200';
+    case 'marriage':   return 'bg-rose-100 text-rose-600 border-rose-200';
+    case 'child_born': return 'bg-amber-100 text-amber-600 border-amber-200';
+    case 'death':      return 'bg-stone-100 text-stone-500 border-stone-200';
+  }
+}
 
 export function EventsTimeline({
   member,
@@ -99,7 +101,7 @@ export function EventsTimeline({
         {events.map((ev, i) => {
           const content = (
             <div className={`ml-5 ${ev.href ? 'hover:opacity-80 transition-opacity' : ''}`}>
-              <div className={`absolute -left-[9px] w-4 h-4 rounded-full border-2 flex items-center justify-center ${colors[ev.type]}`}>
+              <div className={`absolute -left-2.25 w-4 h-4 rounded-full border-2 flex items-center justify-center ${dotColor(ev.type)}`}>
                 {icons[ev.type]}
               </div>
               <p className="text-sm font-medium text-amber-900">{ev.label}</p>

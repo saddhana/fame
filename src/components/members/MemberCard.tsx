@@ -38,7 +38,7 @@ export function MemberCard({ member }: { member: FamilyMember }) {
         </div>
 
         {/* Deceased indicator */}
-        {member.death_date && (
+        {(member.is_deceased || !!member.death_date) && (
           <div className="absolute top-2 left-2">
             <Badge variant="secondary" className="bg-stone-800/70 text-white border-0 text-sm">
               Almarhum{member.gender === 'P' ? 'ah' : ''}

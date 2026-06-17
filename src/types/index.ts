@@ -4,6 +4,7 @@ export interface FamilyMember {
   nickname: string | null;
   birth_date: string | null;
   death_date: string | null;
+  is_deceased: boolean;
   gender: "L" | "P";
   birth_place: string | null;
   phone: string | null;

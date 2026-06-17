@@ -62,7 +62,7 @@ export default async function MemberDetailPage({
   siblings.sort((a, b) => dateCmp(a.birth_date, b.birth_date));
   childrenInLaw.sort((a, b) => dateCmp(a._spouseBirthDate, b._spouseBirthDate));
 
-  const isDeceased = !!member.death_date;
+  const isDeceased = member.is_deceased || !!member.death_date;
   const isMale = member.gender === 'L';
 
   return (
