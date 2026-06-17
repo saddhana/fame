@@ -17,6 +17,7 @@ import { EventsTimeline } from '@/components/members/EventsTimeline';
 import { RelationshipPathFinder } from '@/components/members/RelationshipPathFinder';
 import { RemoveRelationshipButton } from '@/components/members/RemoveRelationshipButton';
 import { EndMarriageButton } from '@/components/members/EndMarriageButton';
+import { EditSpouseButton } from '@/components/members/EditSpouseButton';
 import { LocationMap } from '@/components/members/LocationMapDynamic';
 
 export default async function MemberDetailPage({
@@ -233,7 +234,7 @@ export default async function MemberDetailPage({
                   Google Maps
                 </a>
               </div>
-              <div className="rounded-xl overflow-hidden shadow-sm border border-stone-100">
+              <div className="rounded-xl overflow-hidden shadow-sm border border-stone-100 isolate">
                 <LocationMap lat={member.location_lat} lng={member.location_lng} />
               </div>
             </div>
@@ -312,6 +313,7 @@ export default async function MemberDetailPage({
                   ...s,
                   _relationshipId: s.relationship.id,
                   _isActiveRel: s.relationship.is_active,
+                  _relationship: s.relationship,
                   _badge: !s.relationship.is_active ? 'Bercerai' : s.relationship.marriage_order && s.relationship.marriage_order > 1 ? `Pernikahan ke-${s.relationship.marriage_order}` : undefined,
                 }))}
                 addButton={<RelationshipManager memberId={id} memberName={member.full_name} defaultRelType="spouse" defaultOpen={autoAddRel === 'spouse'} />}
@@ -394,7 +396,7 @@ function RelationSection({
 }: {
   icon: React.ReactNode;
   title: string;
-  members: (import('@/types').FamilyMember & { _badge?: string; _relationshipId?: string; _isActiveRel?: boolean })[];
+  members: (import('@/types').FamilyMember & { _badge?: string; _relationshipId?: string; _isActiveRel?: boolean; _relationship?: import('@/types').Relationship })[];
   addButton?: React.ReactNode;
   hint?: string;
 }) {
@@ -437,6 +439,9 @@ function RelationSection({
                   </Badge>
                 )}
               </Link>
+              {'_relationship' in m && m._relationship && (
+                <EditSpouseButton relationship={m._relationship} spouseName={m.full_name} />
+              )}
               {'_isActiveRel' in m && m._isActiveRel && m._relationshipId && (
                 <EndMarriageButton relationshipId={m._relationshipId} spouseName={m.full_name} />
               )}

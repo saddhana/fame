@@ -314,3 +314,24 @@ export async function endMarriage(
   revalidatePath("/members");
   revalidatePath("/family-tree");
 }
+
+export async function updateSpouseRelationship(
+  id: string,
+  data: {
+    marriage_date: string | null;
+    divorce_date: string | null;
+    is_active: boolean;
+    marriage_order: number | null;
+  },
+): Promise<void> {
+  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const db = createServerSupabase();
+  const { error } = await db
+    .from("relationships")
+    .update(data)
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/members");
+  revalidatePath("/family-tree");
+}

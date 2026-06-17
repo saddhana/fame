@@ -215,7 +215,7 @@ function formatDate(val: string | null): string {
 export async function getTemplateRows(): Promise<CsvRow[]> {
   const { data: members } = await supabase
     .from("family_members")
-    .select("id, full_name, nickname, gender, birth_date, birth_place, death_date, bio, phone, email, address")
+    .select("id, full_name, nickname, gender, birth_date, birth_place, death_date, is_deceased, bio, phone, email, address")
     .order("created_at", { ascending: true })
     .limit(15);
 

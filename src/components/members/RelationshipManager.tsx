@@ -215,6 +215,7 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
           birth_date: quickBirthDate || null,
           nickname: null,
           birth_place: null,
+          is_deceased: false,
           death_date: null,
           phone: null,
           email: null,
