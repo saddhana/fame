@@ -22,9 +22,26 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sastro.daniswara.dev"),
   title: "FAME — Silsilah Keluarga Kita",
   description: "Aplikasi silsilah keluarga untuk mencatat dan menampilkan pohon keluarga, biodata, dan foto keluarga.",
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: "/og-image.png",
+    apple: "/og-image.png",
+  },
+  openGraph: {
+    title: "FAME — Silsilah Keluarga Kita",
+    description: "Aplikasi silsilah keluarga untuk mencatat dan menampilkan pohon keluarga, biodata, dan foto keluarga.",
+    siteName: "FAME",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1080, height: 1080, alt: "FAME" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "FAME — Silsilah Keluarga Kita",
+    description: "Aplikasi silsilah keluarga untuk mencatat dan menampilkan pohon keluarga, biodata, dan foto keluarga.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
