@@ -38,8 +38,12 @@ function stripDisambiguator(name: string): string {
 function parseDate(val: string): string | null {
   if (!val || !val.trim()) return null;
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(val.trim())) {
-    const [dd, mm, yyyy] = val.trim().split("/");
-    return `${yyyy}-${mm}-${dd}`;
+    const [a, b, yyyy] = val.trim().split("/");
+    // If first part > 12, it must be DD/MM/YYYY (a=day, b=month)
+    // If second part > 12, it must be MM/DD/YYYY (a=month, b=day) — swap
+    const dd = parseInt(b) > 12 ? b : a;
+    const mm = parseInt(b) > 12 ? a : b;
+    return `${yyyy}-${mm.padStart(2,"0")}-${dd.padStart(2,"0")}`;
   }
   return null;
 }

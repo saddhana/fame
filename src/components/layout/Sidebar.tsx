@@ -13,7 +13,6 @@ import {
   TreePine,
   ChevronLeft,
   ChevronRight,
-  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/AuthContext';
@@ -24,7 +23,6 @@ const navItems = [
   { href: '/family-tree', label: 'Silsilah', icon: GitBranch },
   { href: '/members', label: 'Anggota', icon: Users },
   { href: '/gallery', label: 'Galeri', icon: Camera },
-  { href: '/import', label: 'Import CSV', icon: Upload },
   { href: '/about', label: 'Tentang', icon: Info },
 ];
 
