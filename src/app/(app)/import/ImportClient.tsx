@@ -333,6 +333,13 @@ export function ImportClient() {
               <span className="font-semibold">{result.created}</span>
               <span className="text-sm">anggota ditambahkan</span>
             </div>
+            {(result.updated ?? 0) > 0 && (
+              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 rounded-lg px-4 py-2.5">
+                <CheckCircle className="w-4 h-4" />
+                <span className="font-semibold">{result.updated}</span>
+                <span className="text-sm">anggota diperbarui</span>
+              </div>
+            )}
             {result.skipped.length > 0 && (
               <div className="flex items-center gap-2 bg-amber-50 text-amber-700 rounded-lg px-4 py-2.5">
                 <AlertCircle className="w-4 h-4" />

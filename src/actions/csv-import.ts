@@ -25,8 +25,14 @@ export interface CsvRow {
 
 export interface ImportResult {
   created: number;
+  updated: number;
   skipped: string[];
   errors: string[];
+}
+
+// Strip import-only disambiguators like "Hartono (01.03)" → "Hartono"
+function stripDisambiguator(name: string): string {
+  return name.replace(/\s*\(\d[\d.]*\)\s*$/, '').trim();
 }
 
 function parseDate(val: string): string | null {
@@ -42,7 +48,7 @@ export async function importFromCSV(rows: CsvRow[]): Promise<ImportResult> {
   if (!(await isAuthenticated())) throw new Error("Unauthorized");
 
   const db = createServerSupabase();
-  const result: ImportResult = { created: 0, skipped: [], errors: [] };
+  const result: ImportResult = { created: 0, updated: 0, skipped: [], errors: [] };
 
   // Fetch existing members to build name→id map
   const { data: existingMembers } = await supabase
@@ -60,20 +66,51 @@ export async function importFromCSV(rows: CsvRow[]): Promise<ImportResult> {
     if (!fullName) continue;
 
     const key = fullName.toLowerCase();
-    if (nameToId.has(key)) {
-      result.skipped.push(fullName);
-      continue;
-    }
+    const cleanedName = stripDisambiguator(fullName);
+    const cleanedKey = cleanedName.toLowerCase();
 
     const gender = row["Jenis Kelamin"]?.trim().toUpperCase();
     const isDeceased = row["Sudah Meninggal"]?.trim().toLowerCase() === "ya";
     const birthDate = parseDate(row["Tanggal Lahir"]);
     const deathDate = isDeceased ? parseDate(row["Tanggal Meninggal"]) : null;
 
+    const existingId = nameToId.get(key) ?? nameToId.get(cleanedKey);
+
+    if (existingId) {
+      // Register disambiguated key so pass 2 relationship lookups work
+      if (!nameToId.has(key)) nameToId.set(key, existingId);
+
+      // Update only non-empty fields — don't overwrite existing data with blanks
+      const updates: Record<string, unknown> = {};
+      if (row["Nama Panggilan"]?.trim()) updates.nickname = row["Nama Panggilan"].trim();
+      if (gender === "P" || gender === "L") updates.gender = gender;
+      if (birthDate) updates.birth_date = birthDate;
+      if (row["Tempat Lahir"]?.trim()) updates.birth_place = row["Tempat Lahir"].trim();
+      if (row["Sudah Meninggal"]?.trim()) updates.is_deceased = isDeceased;
+      if (deathDate) updates.death_date = deathDate;
+      if (row["Biografi"]?.trim()) updates.bio = row["Biografi"].trim();
+      if (row["Telepon"]?.trim()) updates.phone = row["Telepon"].trim();
+      if (row["Email"]?.trim()) updates.email = row["Email"].trim();
+      if (row["Alamat"]?.trim()) updates.address = row["Alamat"].trim();
+
+      if (Object.keys(updates).length > 0) {
+        const { error } = await db
+          .from("family_members")
+          .update(updates)
+          .eq("id", existingId);
+        if (error) {
+          result.errors.push(`Gagal memperbarui "${cleanedName}": ${error.message}`);
+        } else {
+          result.updated++;
+        }
+      }
+      continue;
+    }
+
     const { data, error } = await db
       .from("family_members")
       .insert({
-        full_name: fullName,
+        full_name: cleanedName,
         nickname: row["Nama Panggilan"]?.trim() || null,
         gender: gender === "P" ? "P" : "L",
         birth_date: birthDate,
@@ -95,6 +132,7 @@ export async function importFromCSV(rows: CsvRow[]): Promise<ImportResult> {
     }
 
     nameToId.set(key, data.id);
+    nameToId.set(cleanedKey, data.id);
     result.created++;
   }
 
