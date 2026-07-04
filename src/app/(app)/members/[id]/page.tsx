@@ -18,6 +18,7 @@ import { RelationshipPathFinder } from '@/components/members/RelationshipPathFin
 import { RemoveRelationshipButton } from '@/components/members/RemoveRelationshipButton';
 import { EndMarriageButton } from '@/components/members/EndMarriageButton';
 import { EditSpouseButton } from '@/components/members/EditSpouseButton';
+import { DeleteMemberButton } from '@/components/members/DeleteMemberButton';
 import { LocationMap } from '@/components/members/LocationMapDynamic';
 
 export default async function MemberDetailPage({
@@ -75,12 +76,15 @@ export default async function MemberDetailPage({
           <ChevronRight className="w-3.5 h-3.5 shrink-0" />
           <span className="text-stone-700 font-medium truncate">{member.full_name}</span>
         </nav>
-        <Link href={`/members/${id}/edit`} className="shrink-0 ml-3">
-          <Button variant="outline" size="sm" className="border-stone-200 text-stone-600 hover:bg-stone-50 text-sm">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2 shrink-0 ml-3">
+          <Link href={`/members/${id}/edit`}>
+            <Button variant="outline" size="sm" className="border-stone-200 text-stone-600 hover:bg-stone-50 text-sm">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </Link>
+          <DeleteMemberButton id={id} name={member.full_name} />
+        </div>
       </div>
 
       {/* Profile Card */}

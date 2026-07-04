@@ -27,17 +27,17 @@ function MemberNodeComponent({ data }: NodeProps) {
       <div
         onClick={() => router.push(`/members/${member.id}`)}
         style={{ borderTopColor: accentColor }}
-        className="group cursor-pointer rounded-xl border border-stone-200 border-t-[3px] bg-white shadow-sm hover:shadow-md transition-all duration-150 min-w-52.5"
+        className="group cursor-pointer rounded-xl border border-stone-200 border-t-[3px] bg-white shadow-sm hover:shadow-md transition-all duration-150 w-42 overflow-hidden"
       >
-        <div className="flex items-center gap-3 p-3.5">
+        <div className="flex items-center gap-2.5 p-2.5">
           {/* Avatar */}
-          <div className={`w-11 h-11 rounded-lg overflow-hidden shrink-0 ${avatarBg}`}>
+          <div className={`w-9 h-9 rounded-lg overflow-hidden shrink-0 ${avatarBg}`}>
             {member.profile_photo_url ? (
               <Image
                 src={member.profile_photo_url}
                 alt={member.full_name}
-                width={44}
-                height={44}
+                width={36}
+                height={36}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -49,12 +49,12 @@ function MemberNodeComponent({ data }: NodeProps) {
 
           {/* Info */}
           <div className="min-w-0">
-            <p className="text-sm font-bold text-stone-900 truncate max-w-35 group-hover:text-emerald-700 transition-colors">
+            <p className="text-sm font-bold text-stone-900 truncate max-w-20 group-hover:text-emerald-700 transition-colors">
               {isDeceased && <span className="text-stone-400 mr-1 text-xs font-medium">{isMale ? 'Alm.' : 'Almh.'}</span>}
               {member.full_name}
             </p>
             {member.nickname && (
-              <p className="text-xs text-stone-500 truncate max-w-35">
+              <p className="text-xs text-stone-500 truncate max-w-20">
                 &ldquo;{member.nickname}&rdquo;
               </p>
             )}

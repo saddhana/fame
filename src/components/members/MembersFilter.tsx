@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,13 @@ export function MembersFilter({ generations }: { generations: number[] }) {
   const currentQuery = searchParams.get('q') || '';
   const currentGen = searchParams.get('gen') || '';
 
+  const [inputValue, setInputValue] = useState(currentQuery);
+
+  // Keep input in sync when URL changes externally (e.g. navigating back/forward)
+  useEffect(() => {
+    setInputValue(currentQuery);
+  }, [currentQuery]);
+
   function updateParams(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
@@ -21,7 +29,7 @@ export function MembersFilter({ generations }: { generations: number[] }) {
     } else {
       params.delete(key);
     }
-    router.push(`${pathname}?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`);
   }
 
   return (
@@ -31,8 +39,11 @@ export function MembersFilter({ generations }: { generations: number[] }) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400" />
         <Input
           placeholder="Cari nama..."
-          defaultValue={currentQuery}
-          onChange={(e) => updateParams('q', e.target.value)}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            updateParams('q', e.target.value);
+          }}
           className="pl-10 h-12 text-lg sm:text-base sm:h-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400/20 bg-white/80"
         />
       </div>

@@ -29,9 +29,44 @@ const nodeTypes: NodeTypes = {
   junction: JunctionNode,
 };
 
-const NODE_WIDTH = 240;
-const NODE_HEIGHT = 115;
-const COUPLE_GAP = 60;
+const NODE_WIDTH = 168;
+const NODE_HEIGHT = 88;
+const COUPLE_GAP = 48;
+
+function layoutComponent(
+  coupleIndices: number[],
+  couples: { ids: string[]; rel?: Relationship }[],
+  parentChildRels: Relationship[],
+  memberCoupleIndex: Map<string, number>
+): Map<number, { x: number; y: number }> {
+  const coupleNodeId = (idx: number) => `c${idx}`;
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: 'TB', nodesep: 20, ranksep: 90, edgesep: 10 });
+
+  const idxSet = new Set(coupleIndices);
+  for (const i of coupleIndices) {
+    const w = couples[i].ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH;
+    g.setNode(coupleNodeId(i), { width: w, height: NODE_HEIGHT });
+  }
+  const edgeSet = new Set<string>();
+  for (const rel of parentChildRels) {
+    const pIdx = memberCoupleIndex.get(rel.person1_id);
+    const cIdx = memberCoupleIndex.get(rel.person2_id);
+    if (pIdx === undefined || cIdx === undefined) continue;
+    if (!idxSet.has(pIdx) || !idxSet.has(cIdx)) continue;
+    const key = `${pIdx}->${cIdx}`;
+    if (!edgeSet.has(key)) { edgeSet.add(key); g.setEdge(coupleNodeId(pIdx), coupleNodeId(cIdx)); }
+  }
+  dagre.layout(g);
+
+  const positions = new Map<number, { x: number; y: number }>();
+  for (const i of coupleIndices) {
+    const n = g.node(coupleNodeId(i));
+    positions.set(i, { x: n.x, y: n.y });
+  }
+  return positions;
+}
 
 function getLayoutedElements(
   members: FamilyMember[],
@@ -62,47 +97,81 @@ function getLayoutedElements(
     }
   }
 
-  // Dagre layout using couple-level nodes
-  const coupleNodeId = (idx: number) => `couple-${idx}`;
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 140, edgesep: 30 });
-
-  couples.forEach((couple, idx) => {
-    const w = couple.ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH;
-    g.setNode(coupleNodeId(idx), { width: w, height: NODE_HEIGHT });
-  });
-
-  const coupleEdgeSet = new Set<string>();
+  // Find connected components via Union-Find
+  const ufParent = couples.map((_, i) => i);
+  function ufFind(x: number): number {
+    if (ufParent[x] !== x) ufParent[x] = ufFind(ufParent[x]);
+    return ufParent[x];
+  }
   for (const rel of parentChildRels) {
     const pIdx = memberCoupleIndex.get(rel.person1_id);
     const cIdx = memberCoupleIndex.get(rel.person2_id);
-    if (pIdx === undefined || cIdx === undefined) continue;
-    const key = `${pIdx}->${cIdx}`;
-    if (!coupleEdgeSet.has(key)) {
-      coupleEdgeSet.add(key);
-      g.setEdge(coupleNodeId(pIdx), coupleNodeId(cIdx));
-    }
+    if (pIdx !== undefined && cIdx !== undefined) ufParent[ufFind(pIdx)] = ufFind(cIdx);
   }
+  const componentMap = new Map<number, number[]>();
+  for (let i = 0; i < couples.length; i++) {
+    const root = ufFind(i);
+    if (!componentMap.has(root)) componentMap.set(root, []);
+    componentMap.get(root)!.push(i);
+  }
+  const components = Array.from(componentMap.values()).sort((a, b) => b.length - a.length);
 
-  dagre.layout(g);
+  // Layout each component separately, then tile in a grid
+  const COMP_GAP_X = 100;
+  const COMP_GAP_Y = 140;
+  const N_COLS = Math.ceil(Math.sqrt(components.length));
+
+  type CompLayout = { positions: Map<number, { x: number; y: number }>; w: number; h: number; minX: number; minY: number };
+  const compLayouts: CompLayout[] = components.map(comp => {
+    const positions = layoutComponent(comp, couples, parentChildRels, memberCoupleIndex);
+    const xs = comp.map(i => positions.get(i)!.x);
+    const ys = comp.map(i => positions.get(i)!.y);
+    const hw = comp.map(i => (couples[i].ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH) / 2);
+    const minX = Math.min(...xs.map((x, j) => x - hw[j]));
+    const maxX = Math.max(...xs.map((x, j) => x + hw[j]));
+    const minY = Math.min(...ys.map(y => y - NODE_HEIGHT / 2));
+    const maxY = Math.max(...ys.map(y => y + NODE_HEIGHT / 2));
+    return { positions, w: maxX - minX, h: maxY - minY, minX, minY };
+  });
+
+  const colWidths = Array.from({ length: N_COLS }, () => 0);
+  const rowHeights: number[] = [];
+  compLayouts.forEach(({ w, h }, ci) => {
+    const col = ci % N_COLS;
+    const row = Math.floor(ci / N_COLS);
+    colWidths[col] = Math.max(colWidths[col], w);
+    rowHeights[row] = Math.max(rowHeights[row] ?? 0, h);
+  });
+  const colX = colWidths.reduce<number[]>((acc, _, i) =>
+    [...acc, i === 0 ? 0 : acc[i - 1] + colWidths[i - 1] + COMP_GAP_X], []);
+  const rowY = rowHeights.reduce<number[]>((acc, _, i) =>
+    [...acc, i === 0 ? 0 : acc[i - 1] + rowHeights[i - 1] + COMP_GAP_Y], []);
+
+  // Build final position lookup: coupleIdx → absolute {x, y}
+  const couplePos = new Map<number, { x: number; y: number }>();
+  compLayouts.forEach(({ positions, minX, minY }, ci) => {
+    const dx = colX[ci % N_COLS] - minX;
+    const dy = rowY[Math.floor(ci / N_COLS)] - minY;
+    for (const [i, pos] of positions) {
+      couplePos.set(i, { x: pos.x + dx, y: pos.y + dy });
+    }
+  });
 
   const memberById = new Map(members.map(m => [m.id, m]));
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // Which couples have children?
   const coupleHasChildren = new Set<number>();
   for (const rel of parentChildRels) {
     const pIdx = memberCoupleIndex.get(rel.person1_id);
     if (pIdx !== undefined) coupleHasChildren.add(pIdx);
   }
 
-  // Place member nodes & junction nodes
   couples.forEach((couple, idx) => {
-    const coupleNode = g.node(coupleNodeId(idx));
-    const cx = coupleNode.x;
-    const cy = coupleNode.y;
+    const pos = couplePos.get(idx);
+    if (!pos) return;
+    const cx = pos.x;
+    const cy = pos.y;
 
     if (couple.ids.length === 2) {
       const halfSpan = (NODE_WIDTH + COUPLE_GAP) / 2;
@@ -124,7 +193,6 @@ function getLayoutedElements(
         });
       }
 
-      // Spouse edge: side-to-side using right/left handles
       if (couple.rel) {
         edges.push({
           id: `sp-${couple.rel.id}`,
@@ -143,7 +211,6 @@ function getLayoutedElements(
         });
       }
 
-      // Junction node at center-bottom of couple (for child edges)
       if (coupleHasChildren.has(idx)) {
         const jId = `junction-${idx}`;
         nodes.push({
@@ -155,23 +222,17 @@ function getLayoutedElements(
           draggable: false,
           selectable: false,
         });
-
-        // Connect both spouses to junction (short vertical lines from each spouse bottom to junction top)
         edges.push({
           id: `j-link-0-${idx}`,
-          source: couple.ids[0],
-          sourceHandle: 'bottom',
-          target: jId,
-          targetHandle: 'top',
+          source: couple.ids[0], sourceHandle: 'bottom',
+          target: jId, targetHandle: 'top',
           type: 'straight',
           style: { stroke: '#16a34a', strokeWidth: 2 },
         });
         edges.push({
           id: `j-link-1-${idx}`,
-          source: couple.ids[1],
-          sourceHandle: 'bottom',
-          target: jId,
-          targetHandle: 'top',
+          source: couple.ids[1], sourceHandle: 'bottom',
+          target: jId, targetHandle: 'top',
           type: 'straight',
           style: { stroke: '#16a34a', strokeWidth: 2 },
         });
