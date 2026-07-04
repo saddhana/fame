@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, UserPlus, Link as LinkIcon } from 'lucide-react';
+import { Plus, UserPlus, Link as LinkIcon, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/AuthContext';
 import {
@@ -42,7 +42,7 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [search, setSearch] = useState('');
   const [relType, setRelType] = useState(defaultRelType || 'spouse');
-  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [comboOpen, setComboOpen] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<'form' | 'suggestions'>('form');
@@ -56,6 +56,9 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
   const [divorceDate, setDivorceDate] = useState('');
   const [isActiveRel, setIsActiveRel] = useState(true);
 
+  // Multi-select only for non-spouse types
+  const isMultiSelect = relType !== 'spouse';
+
   const relTypeLabels: Record<string, string> = {
     spouse: 'Pasangan (suami/istri)',
     parent: 'Orang tua (ayah/ibu)',
@@ -68,20 +71,22 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
     }
   }, [open]);
 
+  function resetForm() {
+    setRelType(defaultRelType || 'spouse');
+    setSearch('');
+    setSelectedMemberIds([]);
+    setStep('form');
+    setSuggestions([]);
+    setSubMode('search');
+    setQuickName('');
+    setQuickGender('L');
+    setQuickBirthDate('');
+    setDivorceDate('');
+    setIsActiveRel(true);
+  }
+
   function handleOpenChange(isOpen: boolean) {
-    if (!isOpen) {
-      setRelType(defaultRelType || 'spouse');
-      setSearch('');
-      setSelectedMemberId('');
-      setStep('form');
-      setSuggestions([]);
-      setSubMode('search');
-      setQuickName('');
-      setQuickGender('L');
-      setQuickBirthDate('');
-      setDivorceDate('');
-      setIsActiveRel(true);
-    }
+    if (!isOpen) resetForm();
     setOpen(isOpen);
   }
 
@@ -92,17 +97,12 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
     };
 
     if (type === 'spouse') {
-      // memberId ↔ relatedId as spouses
-      // Suggest: each spouse's existing children should get the other spouse as parent
       const [myChildren, theirChildren] = await Promise.all([
         getChildren(memberId),
         getChildren(relatedId),
       ]);
-
       const myName = members.find(m => m.id === memberId)?.full_name ?? 'Anda';
       const theirName = members.find(m => m.id === relatedId)?.full_name ?? 'pasangan';
-
-      // My children → add relatedId as parent
       for (const child of myChildren) {
         const childParents = await getParents(child.id);
         if (!childParents.some(p => p.id === relatedId)) {
@@ -114,8 +114,6 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
           });
         }
       }
-
-      // Their children → add memberId as parent
       for (const child of theirChildren) {
         const childParents = await getParents(child.id);
         if (!childParents.some(p => p.id === memberId)) {
@@ -128,8 +126,6 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
         }
       }
     } else if (type === 'child') {
-      // memberId = parent, relatedId = child
-      // Suggest: parent's spouses → also become parents of the child
       const [spouses, existingParents] = await Promise.all([
         getSpouses(memberId),
         getParents(relatedId),
@@ -147,8 +143,6 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
         }
       }
     } else if (type === 'parent') {
-      // memberId = child (current), relatedId = parent
-      // Suggest 1: selected parent's spouses → also become parents of current member
       const [parentSpouses, existingMyParents, mySiblings, parentChildren] = await Promise.all([
         getSpouses(relatedId),
         getParents(memberId),
@@ -156,20 +150,18 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
         getChildren(relatedId),
       ]);
       const existingParentIds = new Set(existingMyParents.map(p => p.id));
+      const myName = members.find(m => m.id === memberId)?.full_name ?? 'anggota';
       const parentName = members.find(m => m.id === relatedId)?.full_name ?? 'orang tua';
-
       for (const s of parentSpouses) {
         if (!existingParentIds.has(s.id)) {
           suggs.push({
             id: `co-parent-${s.id}`,
-            label: `Tambahkan ${s.full_name} sebagai orang tua Anda juga`,
+            label: `Tambahkan ${s.full_name} sebagai orang tua ${myName} juga`,
             rel: { ...parentChildRel, person1_id: s.id, person2_id: memberId },
             checked: true,
           });
         }
       }
-
-      // Suggest 2: current member's siblings → also get the new parent
       const existingChildIds = new Set(parentChildren.map(c => c.id));
       for (const sib of mySiblings) {
         if (!existingChildIds.has(sib.id)) {
@@ -230,13 +222,25 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
           location_lng: null,
         });
         setMembers(prev => [...prev, newMember]);
-        setSelectedMemberId(newMember.id);
+        setSelectedMemberIds([newMember.id]);
         setSubMode('search');
         toast.success(`${newMember.full_name} berhasil ditambahkan!`);
       } catch {
         toast.error('Gagal membuat anggota baru');
       }
     });
+  }
+
+  function toggleMember(id: string) {
+    if (!isMultiSelect) {
+      setSelectedMemberIds([id]);
+      setComboOpen(false);
+      setSearch('');
+      return;
+    }
+    setSelectedMemberIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
   }
 
   const filteredMembers = members
@@ -246,22 +250,31 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
       m.nickname?.toLowerCase().includes(search.toLowerCase())
     );
 
+  function triggerLabel() {
+    if (selectedMemberIds.length === 0) return 'Pilih anggota keluarga';
+    if (selectedMemberIds.length === 1) {
+      const m = members.find(m => m.id === selectedMemberIds[0]);
+      return m ? `${m.full_name}${m.nickname ? ` (${m.nickname})` : ''}` : 'Pilih anggota keluarga';
+    }
+    return `${selectedMemberIds.length} anggota dipilih`;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const relatedId = selectedMemberId;
-    const marriageDate = formData.get('marriage_date') as string;
-    const marriageOrder = formData.get('marriage_order') as string;
-
-    if (!relatedId) {
+    if (selectedMemberIds.length === 0) {
       toast.error('Pilih anggota keluarga terlebih dahulu');
       return;
     }
 
+    const marriageDate = formData.get('marriage_date') as string;
+    const marriageOrder = formData.get('marriage_order') as string;
+
     startTransition(async () => {
       try {
         if (relType === 'spouse') {
+          const relatedId = selectedMemberIds[0];
           await createRelationship({
             person1_id: memberId,
             person2_id: relatedId,
@@ -272,38 +285,59 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
             marriage_order: marriageOrder ? parseInt(marriageOrder) : 1,
           });
           toast.success('Pasangan berhasil ditambahkan!');
+          const suggs = await buildSuggestions('spouse', relatedId);
+          if (suggs.length > 0) {
+            setSuggestions(suggs);
+            setStep('suggestions');
+            return;
+          }
         } else if (relType === 'parent') {
-          await createRelationship({
-            person1_id: relatedId,
-            person2_id: memberId,
-            type: 'parent_child',
-            marriage_date: null,
-            divorce_date: null,
-            is_active: true,
-            marriage_order: null,
-          });
-          toast.success('Orang tua berhasil ditambahkan!');
+          for (const relatedId of selectedMemberIds) {
+            await createRelationship({
+              person1_id: relatedId,
+              person2_id: memberId,
+              type: 'parent_child',
+              marriage_date: null, divorce_date: null, is_active: true, marriage_order: null,
+            });
+          }
+          const label = selectedMemberIds.length > 1
+            ? `${selectedMemberIds.length} orang tua berhasil ditambahkan!`
+            : 'Orang tua berhasil ditambahkan!';
+          toast.success(label);
+          // Single selection: show suggestions; bulk: skip
+          if (selectedMemberIds.length === 1) {
+            const suggs = await buildSuggestions('parent', selectedMemberIds[0]);
+            if (suggs.length > 0) {
+              setSuggestions(suggs);
+              setStep('suggestions');
+              return;
+            }
+          }
         } else if (relType === 'child') {
-          await createRelationship({
-            person1_id: memberId,
-            person2_id: relatedId,
-            type: 'parent_child',
-            marriage_date: null,
-            divorce_date: null,
-            is_active: true,
-            marriage_order: null,
-          });
-          toast.success('Anak berhasil ditambahkan!');
+          for (const relatedId of selectedMemberIds) {
+            await createRelationship({
+              person1_id: memberId,
+              person2_id: relatedId,
+              type: 'parent_child',
+              marriage_date: null, divorce_date: null, is_active: true, marriage_order: null,
+            });
+          }
+          const label = selectedMemberIds.length > 1
+            ? `${selectedMemberIds.length} anak berhasil ditambahkan!`
+            : 'Anak berhasil ditambahkan!';
+          toast.success(label);
+          if (selectedMemberIds.length === 1) {
+            const suggs = await buildSuggestions('child', selectedMemberIds[0]);
+            if (suggs.length > 0) {
+              setSuggestions(suggs);
+              setStep('suggestions');
+              return;
+            }
+          }
         }
 
-        const suggs = await buildSuggestions(relType, relatedId);
-        if (suggs.length > 0) {
-          setSuggestions(suggs);
-          setStep('suggestions');
-        } else {
-          setOpen(false);
-          router.refresh();
-        }
+        setOpen(false);
+        router.refresh();
       } catch (err) {
         toast.error('Gagal menambahkan hubungan');
         console.error(err);
@@ -320,11 +354,7 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
       toast.error('Beberapa hubungan gagal disimpan');
     } finally {
       setIsSavingSuggestions(false);
-      setStep('form');
-      setSuggestions([]);
-      setRelType(defaultRelType || 'spouse');
-      setSearch('');
-      setSelectedMemberId('');
+      resetForm();
       setOpen(false);
       router.refresh();
     }
@@ -396,7 +426,7 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
           {!defaultRelType && (
           <div className="space-y-2">
             <Label className="text-amber-800 text-base">Jenis Hubungan</Label>
-            <Select name="type" value={relType} onValueChange={(v) => v && setRelType(v)}>
+            <Select name="type" value={relType} onValueChange={(v) => { if (v) { setRelType(v); setSelectedMemberIds([]); } }}>
               <SelectTrigger className="border-amber-200">
                 <SelectValue>{relTypeLabels[relType]}</SelectValue>
               </SelectTrigger>
@@ -410,8 +440,19 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
           )}
 
           <div className="space-y-2">
-            <Label className="text-amber-800 text-base">Pilih Anggota</Label>
-            <input type="hidden" name="related_id" value={selectedMemberId} />
+            <div className="flex items-center justify-between">
+              <Label className="text-amber-800 text-base">Pilih Anggota</Label>
+              {isMultiSelect && selectedMemberIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedMemberIds([])}
+                  className="text-xs text-amber-500 hover:text-amber-700 transition-colors"
+                >
+                  Bersihkan ({selectedMemberIds.length})
+                </button>
+              )}
+            </div>
+
             {subMode === 'quick-create' ? (
               <div className="rounded-lg border border-amber-300 bg-amber-50/50 p-3 space-y-3">
                 <div className="flex items-center justify-between">
@@ -483,10 +524,8 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
                   onClick={() => setComboOpen((o) => !o)}
                   className="w-full flex items-center justify-between rounded-lg border border-amber-200 bg-transparent px-3 py-3 text-lg sm:text-base text-left outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400/20"
                 >
-                  <span className={selectedMemberId ? 'text-foreground' : 'text-muted-foreground'}>
-                    {selectedMemberId
-                      ? (() => { const m = members.find(m => m.id === selectedMemberId); return m ? `${m.full_name}${m.nickname ? ` (${m.nickname})` : ''}` : 'Pilih anggota keluarga'; })()
-                      : 'Pilih anggota keluarga'}
+                  <span className={selectedMemberIds.length > 0 ? 'text-foreground' : 'text-muted-foreground'}>
+                    {triggerLabel()}
                   </span>
                   <svg className="w-4 h-4 text-muted-foreground shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
@@ -503,17 +542,21 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
                       />
                     </div>
                     <ul className="max-h-56 overflow-y-auto py-1">
-                      {filteredMembers.map((m) => (
-                        <li
-                          key={m.id}
-                          onClick={() => { setSelectedMemberId(m.id); setComboOpen(false); setSearch(''); }}
-                          className={`px-3 py-3 text-lg sm:text-base cursor-pointer hover:bg-amber-50 flex items-center justify-between ${
-                            selectedMemberId === m.id ? 'bg-amber-50 font-medium text-amber-700' : ''
-                          }`}
-                        >
-                          <span>{m.full_name}{m.nickname ? ` (${m.nickname})` : ''}</span>
-                        </li>
-                      ))}
+                      {filteredMembers.map((m) => {
+                        const isSelected = selectedMemberIds.includes(m.id);
+                        return (
+                          <li
+                            key={m.id}
+                            onClick={() => toggleMember(m.id)}
+                            className={`px-3 py-3 text-lg sm:text-base cursor-pointer hover:bg-amber-50 flex items-center justify-between gap-2 ${
+                              isSelected ? 'bg-amber-50 font-medium text-amber-700' : ''
+                            }`}
+                          >
+                            <span>{m.full_name}{m.nickname ? ` (${m.nickname})` : ''}</span>
+                            {isSelected && <Check className="w-4 h-4 shrink-0 text-amber-600" />}
+                          </li>
+                        );
+                      })}
                       {filteredMembers.length === 0 && !search && (
                         <li className="px-3 py-3 text-base text-muted-foreground">Ketik nama untuk mencari</li>
                       )}
@@ -530,6 +573,17 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
                         </li>
                       )}
                     </ul>
+                    {isMultiSelect && selectedMemberIds.length > 0 && (
+                      <div className="border-t border-amber-100 p-2">
+                        <button
+                          type="button"
+                          onClick={() => setComboOpen(false)}
+                          className="w-full py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+                        >
+                          Selesai pilih ({selectedMemberIds.length})
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -599,10 +653,14 @@ export function RelationshipManager({ memberId, defaultRelType, defaultOpen }: R
             </Button>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || selectedMemberIds.length === 0}
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
-              {isPending ? 'Menyimpan...' : 'Simpan'}
+              {isPending
+                ? 'Menyimpan...'
+                : selectedMemberIds.length > 1
+                ? `Simpan ${selectedMemberIds.length} hubungan`
+                : 'Simpan'}
             </Button>
           </div>
         </form>

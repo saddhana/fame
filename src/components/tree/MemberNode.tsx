@@ -48,17 +48,17 @@ function MemberNodeComponent({ data }: NodeProps) {
           </div>
 
           {/* Info */}
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-stone-900 truncate max-w-20 group-hover:text-emerald-700 transition-colors">
-              {isDeceased && <span className="text-stone-400 mr-1 text-xs font-medium">{isMale ? 'Alm.' : 'Almh.'}</span>}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-stone-900 truncate group-hover:text-emerald-700 transition-colors">
               {member.full_name}
             </p>
             {member.nickname && (
-              <p className="text-xs text-stone-500 truncate max-w-20">
+              <p className="text-xs text-stone-500 truncate">
                 &ldquo;{member.nickname}&rdquo;
               </p>
             )}
             <p className="text-xs font-medium text-stone-500 mt-0.5">
+              {isDeceased && <span className="mr-1">{isMale ? 'Alm.' : 'Almh.'}</span>}
               Gen {member.generation}
               {member.birth_date && ` · ${new Date(member.birth_date).getFullYear()}`}
             </p>

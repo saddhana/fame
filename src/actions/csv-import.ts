@@ -37,15 +37,13 @@ function stripDisambiguator(name: string): string {
 
 function parseDate(val: string): string | null {
   if (!val || !val.trim()) return null;
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(val.trim())) {
-    const [a, b, yyyy] = val.trim().split("/");
-    // If first part > 12, it must be DD/MM/YYYY (a=day, b=month)
-    // If second part > 12, it must be MM/DD/YYYY (a=month, b=day) — swap
-    const dd = parseInt(b) > 12 ? b : a;
-    const mm = parseInt(b) > 12 ? a : b;
-    return `${yyyy}-${mm.padStart(2,"0")}-${dd.padStart(2,"0")}`;
-  }
-  return null;
+  const m = val.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  const [, a, b, yyyy] = m;
+  // If second segment > 12 it must be MM/DD/YYYY → swap day and month
+  const dd = parseInt(b) > 12 ? b : a;
+  const mm = parseInt(b) > 12 ? a : b;
+  return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
 }
 
 export async function importFromCSV(rows: CsvRow[]): Promise<ImportResult> {
@@ -258,17 +256,16 @@ export async function getTemplateRows(): Promise<CsvRow[]> {
   const { data: members } = await supabase
     .from("family_members")
     .select("id, full_name, nickname, gender, birth_date, birth_place, death_date, is_deceased, bio, phone, email, address")
-    .order("created_at", { ascending: true })
-    .limit(15);
+    .order("generation", { ascending: true })
+    .order("birth_date", { ascending: true })
+    .order("full_name", { ascending: true });
 
   if (!members?.length) return [];
 
-  const ids = members.map((m) => m.id);
-
+  // Fetch ALL relationships — avoids URL-length limits with 150+ member counts
   const { data: rels } = await supabase
     .from("relationships")
-    .select("type, person1_id, person2_id, is_active")
-    .or(ids.map((id) => `person1_id.eq.${id},person2_id.eq.${id}`).join(","));
+    .select("type, person1_id, person2_id, is_active");
 
   const idToName = new Map(members.map((m) => [m.id, m.full_name]));
 

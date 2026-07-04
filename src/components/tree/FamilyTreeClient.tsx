@@ -37,7 +37,9 @@ function layoutComponent(
   coupleIndices: number[],
   couples: { ids: string[]; rel?: Relationship }[],
   parentChildRels: Relationship[],
-  memberCoupleIndex: Map<string, number>
+  memberCoupleIndex: Map<string, number>,
+  memberBirthDate: Map<string, string>,
+  memberGeneration: Map<string, number>
 ): Map<number, { x: number; y: number }> {
   const coupleNodeId = (idx: number) => `c${idx}`;
   const g = new dagre.graphlib.Graph();
@@ -49,21 +51,108 @@ function layoutComponent(
     const w = couples[i].ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH;
     g.setNode(coupleNodeId(i), { width: w, height: NODE_HEIGHT });
   }
-  const edgeSet = new Set<string>();
+
+  // Build a single-parent-per-couple tree: first parent encountered in sorted
+  // parentChildRels wins. This prevents cross-family marriages from pulling a
+  // couple node away from its primary parent in the layout.
+  const coupleParent = new Map<number, number>();
+  const coupleChildren = new Map<number, number[]>();
   for (const rel of parentChildRels) {
     const pIdx = memberCoupleIndex.get(rel.person1_id);
     const cIdx = memberCoupleIndex.get(rel.person2_id);
     if (pIdx === undefined || cIdx === undefined) continue;
-    if (!idxSet.has(pIdx) || !idxSet.has(cIdx)) continue;
-    const key = `${pIdx}->${cIdx}`;
-    if (!edgeSet.has(key)) { edgeSet.add(key); g.setEdge(coupleNodeId(pIdx), coupleNodeId(cIdx)); }
+    if (!idxSet.has(pIdx) || !idxSet.has(cIdx) || pIdx === cIdx) continue;
+    if (!coupleParent.has(cIdx)) {
+      coupleParent.set(cIdx, pIdx);
+      if (!coupleChildren.has(pIdx)) coupleChildren.set(pIdx, []);
+      coupleChildren.get(pIdx)!.push(cIdx);
+      g.setEdge(coupleNodeId(pIdx), coupleNodeId(cIdx));
+    }
   }
+
   dagre.layout(g);
+
+  // For left-to-right ordering, use the DESCENDANT member's birth date (the one who has parents
+  // in the tree), NOT the married-in spouse's date. e.g. Hartini+Walujo: Walujo was born 1944
+  // but Hartini (born 1948) is the descendant, so we use 1948 to position this couple.
+  const coupleAnchorBirth = new Map<number, string>();
+  for (const rel of parentChildRels) {
+    const cIdx = memberCoupleIndex.get(rel.person2_id);
+    if (cIdx !== undefined && !coupleAnchorBirth.has(cIdx)) {
+      coupleAnchorBirth.set(cIdx, memberBirthDate.get(rel.person2_id) ?? '');
+    }
+  }
+  const coupleBirth = (idx: number) => coupleAnchorBirth.get(idx) ?? '';
+
+  for (const children of coupleChildren.values()) {
+    children.sort((a, b) => {
+      const da = coupleBirth(a), db = coupleBirth(b);
+      return !da ? 1 : !db ? -1 : da.localeCompare(db);
+    });
+  }
+
+  // Walker-style recursive x-layout: each parent is centered above its children.
+  // Children are ordered left-to-right by birth date, so older siblings appear first.
+  const coupleW = (idx: number) => couples[idx].ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH;
+  const GAP = 20;
+  let nextLeafX = 0;
+  const coupleX = new Map<number, number>();
+
+  function shiftSubtree(idx: number, delta: number): void {
+    coupleX.set(idx, coupleX.get(idx)! + delta);
+    for (const c of coupleChildren.get(idx) ?? []) shiftSubtree(c, delta);
+  }
+
+  function subtreeX(idx: number): void {
+    const children = coupleChildren.get(idx) ?? [];
+    const w = coupleW(idx);
+
+    if (children.length === 0) {
+      coupleX.set(idx, nextLeafX + w / 2);
+      nextLeafX += w + GAP;
+      return;
+    }
+
+    // Record where the previous sibling's right edge + GAP sits before placing children.
+    const minLeft = nextLeafX;
+    for (const child of children) subtreeX(child);
+
+    const first = children[0], last = children[children.length - 1];
+    const lx = coupleX.get(first)! - coupleW(first) / 2;
+    const rx = coupleX.get(last)! + coupleW(last) / 2;
+    coupleX.set(idx, (lx + rx) / 2);
+
+    // If this parent node is wider than its children span and its left edge would
+    // overlap the previous sibling, shift the entire subtree right to clear it.
+    const parentLeft = coupleX.get(idx)! - w / 2;
+    if (parentLeft < minLeft) {
+      shiftSubtree(idx, minLeft - parentLeft);
+      nextLeafX += minLeft - parentLeft;
+    }
+
+    // Ensure the next sibling starts after this parent's right edge.
+    nextLeafX = Math.max(nextLeafX, coupleX.get(idx)! + w / 2 + GAP);
+  }
+
+  // Roots: couples with no parent. Sort by generation then birth date.
+  const roots = coupleIndices.filter(i => !coupleParent.has(i));
+  const coupleGen = (idx: number) => Math.min(...couples[idx].ids.map(id => memberGeneration.get(id) ?? 99));
+  roots.sort((a, b) => {
+    const ga = coupleGen(a), gb = coupleGen(b);
+    if (ga !== gb) return ga - gb;
+    const da = coupleBirth(a), db = coupleBirth(b);
+    return !da ? 1 : !db ? -1 : da.localeCompare(db);
+  });
+  for (const root of roots) subtreeX(root);
+  // Fallback for any unreached couples
+  for (const i of coupleIndices) {
+    if (!coupleX.has(i)) { coupleX.set(i, nextLeafX + coupleW(i) / 2); nextLeafX += coupleW(i) + GAP; }
+  }
 
   const positions = new Map<number, { x: number; y: number }>();
   for (const i of coupleIndices) {
     const n = g.node(coupleNodeId(i));
-    positions.set(i, { x: n.x, y: n.y });
+    positions.set(i, { x: coupleX.get(i)!, y: n.y });
   }
   return positions;
 }
@@ -73,7 +162,34 @@ function getLayoutedElements(
   relationships: Relationship[]
 ): { nodes: Node[]; edges: Edge[] } {
   const spouseRels = relationships.filter((r) => r.type === 'spouse');
-  const parentChildRels = relationships.filter((r) => r.type === 'parent_child');
+  const memberBirthDate = new Map(members.map(m => [m.id, m.birth_date ?? '']));
+  const memberGeneration = new Map(members.map(m => [m.id, m.generation ?? 99]));
+
+  // Sort children by birth date PER parent — never mix children from different parents
+  const rawParentChildRels = relationships.filter(r => r.type === 'parent_child');
+  const byParentId = new Map<string, typeof rawParentChildRels>();
+  for (const rel of rawParentChildRels) {
+    const arr = byParentId.get(rel.person1_id) ?? [];
+    arr.push(rel);
+    byParentId.set(rel.person1_id, arr);
+  }
+  for (const arr of byParentId.values()) {
+    arr.sort((a, b) => {
+      const da = memberBirthDate.get(a.person2_id) ?? '';
+      const db = memberBirthDate.get(b.person2_id) ?? '';
+      return !da ? 1 : !db ? -1 : da.localeCompare(db);
+    });
+  }
+  // Sort parent groups by generation then birth date so Dagre places subtrees
+  // in the correct left-to-right order (older/higher-gen parents go first).
+  const parentChildRels = Array.from(byParentId.entries())
+    .sort(([a], [b]) => {
+      const ga = memberGeneration.get(a) ?? 99, gb = memberGeneration.get(b) ?? 99;
+      if (ga !== gb) return ga - gb;
+      const da = memberBirthDate.get(a) ?? '', db = memberBirthDate.get(b) ?? '';
+      return !da ? 1 : !db ? -1 : da.localeCompare(db);
+    })
+    .flatMap(([, rels]) => rels);
 
   // Build couple groups
   const assigned = new Set<string>();
@@ -123,7 +239,7 @@ function getLayoutedElements(
 
   type CompLayout = { positions: Map<number, { x: number; y: number }>; w: number; h: number; minX: number; minY: number };
   const compLayouts: CompLayout[] = components.map(comp => {
-    const positions = layoutComponent(comp, couples, parentChildRels, memberCoupleIndex);
+    const positions = layoutComponent(comp, couples, parentChildRels, memberCoupleIndex, memberBirthDate, memberGeneration);
     const xs = comp.map(i => positions.get(i)!.x);
     const ys = comp.map(i => positions.get(i)!.y);
     const hw = comp.map(i => (couples[i].ids.length === 2 ? NODE_WIDTH * 2 + COUPLE_GAP : NODE_WIDTH) / 2);
