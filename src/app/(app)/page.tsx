@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { TreePine, Users, Camera, GitBranch, ArrowRight, Heart } from 'lucide-react';
 import { getMembers } from '@/actions/members';
 import { getPhotoCount } from '@/actions/photos';
+import { WhatsAppJoinButton } from '@/components/WhatsAppJoinButton';
 
 export default async function HomePage() {
   let memberCount = 0;
@@ -57,6 +58,11 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* WhatsApp Group */}
+      <section className="max-w-5xl mx-auto px-5 pb-6">
+        <WhatsAppJoinButton />
       </section>
 
       {/* Quick Actions */}
